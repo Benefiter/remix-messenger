@@ -11,23 +11,12 @@ import React from 'react';
 }
 
 export const action: ActionFunction = async ({ request }) => {
-  console.log('Action function for ****delete post****');
-  console.log(request);
-  
     await new Promise(res => setTimeout(res, 1000));
   
     const formData = await request.formData();
-    console.log('formdata****');
-    console.log(formData)
-
   
     const slug = formData.get('slug');
-  
-    console.log('invariant check***');
-    console.log(typeof slug);
-    console.log('slug');
-    console.log(slug);
- 
+   
     invariant(typeof slug === 'string');
   
     await deletePost({slug});
@@ -47,8 +36,6 @@ export default function DeleteSlug() {
     const [postValue, setPostValue] = React.useState<UpdatePost>(post);
     const transition = useTransition();
 
-    console.log('post value');
-    console.log(postValue)
     React.useEffect(() => {
       setPostValue(post);
     }, [post]);

@@ -32,8 +32,6 @@ function isValidPostAttributes(
 
 export async function getPosts() {
   const dir = await fs.readdir(postsPath);
-  console.log('dir');
-  console.log(dir);
   return Promise.all(
     dir.map(async filename => {
       const file = await fs.readFile(path.join(postsPath, filename));
@@ -78,9 +76,6 @@ export async function updatePost(post: NewPost) {
   }
 
   export async function deletePost(post: DeletePost) {
-
-    console.log('deletePost called');
-    console.log(post.slug)
     await fs.unlink(path.join(postsPath, post.slug + '.md'));
     return post.slug;
   }

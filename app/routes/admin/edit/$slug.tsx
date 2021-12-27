@@ -12,9 +12,6 @@ import React from 'react';
 }
 
 export const action: ActionFunction = async ({ request }) => {
-  console.log('Action function');
-  console.log(request);
-
     await new Promise(res => setTimeout(res, 1000));
   
     const formData = await request.formData();
