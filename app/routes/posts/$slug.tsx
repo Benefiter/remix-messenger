@@ -15,4 +15,4 @@ export default function PostSlug() {
     return (
       <div dangerouslySetInnerHTML={{ __html: post.html }} />
     );
-  }
+  } 

@@ -13,15 +13,17 @@ export type PostMarkdownAttributes = {
   title: string;
 };
 
-type NewPost = {
-    title: string | undefined;
+export type NewPost = {
+  title: string | undefined;
+  slug: string | undefined;
+  markdown: string | undefined;
+};
+
+export type DeletePost = {
     slug: string | undefined;
-    markdown: string | undefined;
   };
 
 const postsPath = path.join(__dirname, '..', 'posts');
-console.log('postsPath');
-console.log(postsPath);
 function isValidPostAttributes(
   attributes: any
 ): attributes is PostMarkdownAttributes {
@@ -40,11 +42,7 @@ export async function getPosts() {
         isValidPostAttributes(attributes),
         `${filename} has bad meta data!`
       );
-      console.log('about to return');
-      console.log({
-        slug: filename.replace(/\.md$/, ''),
-        title: attributes.title,
-      });
+
       return {
         slug: filename.replace(/\.md$/, ''),
         title: attributes.title,
@@ -66,11 +64,24 @@ export async function getPost(slug: string) {
 }
 
 export async function createPost(post: NewPost) {
+  const md = `---\ntitle: ${post.title}\n---\n\n${post.markdown}`;
+  await fs.writeFile(path.join(postsPath, post.slug + '.md'), md);
+  invariant(typeof post.slug === 'string');
+  return getPost(post.slug);
+}
+
+export async function updatePost(post: NewPost) {
     const md = `---\ntitle: ${post.title}\n---\n\n${post.markdown}`;
-    await fs.writeFile(
-      path.join(postsPath, post.slug + ".md"),
-      md
-    );
-    invariant(typeof post.slug === 'string')
+    await fs.writeFile(path.join(postsPath, post.slug + '.md'), md);
+    invariant(typeof post.slug === 'string');
     return getPost(post.slug);
   }
+
+  export async function deletePost(post: DeletePost) {
+
+    console.log('deletePost called');
+    console.log(post.slug)
+    await fs.unlink(path.join(postsPath, post.slug + '.md'));
+    return post.slug;
+  }
+  
