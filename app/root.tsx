@@ -44,6 +44,11 @@ export default function App() {
               Admin
             </Link>
           </li>
+          <li>
+            <Link style={{ margin: '5px' }} to='/login'>
+              Messenger Login
+            </Link>
+          </li>
         </ul>
         <Outlet />
         <ScrollRestoration />
