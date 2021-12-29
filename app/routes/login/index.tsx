@@ -4,12 +4,14 @@ import {
   redirect,
   useActionData,
   useTransition,
+  LoaderFunction
 } from 'remix';
-import type { LoaderFunction } from 'remix';
-import { getPost } from '~/posts';
 import invariant from 'tiny-invariant';
 import React from 'react';
 import { commitSession, getSession } from '~/sessions';
+import { startSignalRConnection } from './../../services/signalR/signalrClient';
+import { Actions } from '~/reducers/message/actions';
+import { useMessengerProvider } from '~/components/Context/MessengerContext';
 
 type LoginName = {
   user: string | undefined;
@@ -24,9 +26,6 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
 
   const user = formData.get('user');
-
-  console.log('THE USER');
-  console.log(user);
 
   const errors: LoginFormError = {};
   if (!user) errors.user = true;
@@ -54,6 +53,36 @@ export default function Index() {
   const [userName, setUserName] = React.useState<LoginName>({ user: '' });
   const errors = useActionData();
   const transition = useTransition();
+  const { dispatch, connected } = useMessengerProvider();
+
+  // if (connected && !connected()){
+  //   const clientConnection = startSignalRConnection() 
+
+  //   console.log('*****About to set client connection in login form')
+  //   console.log({clientConnection})
+  //   dispatch && dispatch({
+  //     type: Actions.setClientConnection,
+  //     payload: { clientConnection},
+  //   });
+  // }
+  // console.log('Login Index');
+  // console.log({dispatch})
+
+  React.useEffect(() => {
+    console.log('*****In useEffect for MainLayout for userName')
+    if (userName.user === '') return;
+
+    const clientConnection = startSignalRConnection() 
+
+    console.log('*****About to set client connection in login form')
+    console.log({clientConnection})
+    dispatch && dispatch({
+      type: Actions.setClientConnection,
+      payload: { clientConnection},
+    });
+
+    // return () => stopSignalRConnection(clientConnection)
+  },[userName])
 
   return (
     <Form method='post'>
