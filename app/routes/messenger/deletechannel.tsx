@@ -15,10 +15,7 @@ import {
 } from '~/services/signalR/signalrClient';
 import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
-import {
-  Card,
-  CardHeader,
-} from 'reactstrap';
+import { Card, CardHeader } from 'reactstrap';
 import { Channel } from '~/messenger-types';
 
 export const links: LinksFunction = () => {
@@ -64,7 +61,7 @@ export const action: ActionFunction = async ({ request }) => {
     console.log({ channel });
 
     await deleteChannel(channel);
-    const activeChannel = await session.get('activeChannel')
+    const activeChannel = await session.get('activeChannel');
     if (channel === activeChannel) {
       session.set('activeChannel', '');
     }
@@ -80,41 +77,49 @@ const DeleteChannel = () => {
   const { channels } = useLoaderData();
 
   return (
-    <Card className='w-25 d-flex align-items-center'>
-      <CardHeader>
-        <h3>Delete Channel</h3>
+    <Card
+      style={{ width: '300px', float: 'right' }}
+      className='d-flex align-items-center shadow mb-5 bg-body rounded'
+    >
+      <CardHeader className=' w-100 text-center py-4'>
+        <h3 className='mb-4'>Delete Channel</h3>
         <Form method='post'>
-          <h4 className='pe-2 pb-2'>Channel Name</h4>
-          <label className='p-2 align-middle' id='activate'>
-            Select Channel
-          </label>
-
-          <select name='channel' id='channel' className={`mt-1 align-middle`}>
-            {channels.map((c: Channel) => {
-              const id = c.channelId.toString();
-              return (
-                <option key={id} value={id}>
-                  {c.name}
-                </option>
-              );
-            })}
-          </select>
-          <button
-            name='action'
-            color='secondary'
-            value='Cancel'
-            type='submit'
-          >
-            Cancel
-          </button>
-          <button
-            color='primary'
-            name='action'
-            value='OK'
-            type='submit'
-          >
-            OK
-          </button>
+          <div className='d-flex justify-content-between align-items-center row '>
+            <div className='pb-4'>
+              <label className='p-2 align-middle' id='activate'>
+                Select Channel
+              </label>
+              <select
+                name='channel'
+                id='channel'
+                className={`mt-1 align-middle`}
+              >
+                {channels.map((c: Channel) => {
+                  const id = c.channelId.toString();
+                  return (
+                    <option key={id} value={id}>
+                      {c.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div className='d-flex justify-content-between'>
+              <button
+                name='action'
+                className='btn btn-secondary'
+                value='Cancel'
+                type='submit'
+              >
+                Cancel
+              </button>
+              <button 
+                className='btn btn-primary'
+                name='action' value='Delete' type='submit'>
+                Delete
+              </button>
+            </div>
+          </div>
         </Form>
       </CardHeader>
     </Card>

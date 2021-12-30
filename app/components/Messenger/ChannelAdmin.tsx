@@ -1,15 +1,7 @@
 import { Channel, ChannelMessage } from '~/messenger-types';
 import { HubConnection } from '@microsoft/signalr';
-import {
-  Form,
-  Link,
-  LinksFunction,
-  Outlet,
-  ActionFunction,
-  redirect,
-} from 'remix';
+import { Form, Link, LinksFunction } from 'remix';
 import styles from '~/components/Messenger/styles.css';
-import { commitSession, getSession } from '~/sessions';
 import { ebProps } from '~/root';
 
 type ChannelAdminProps = {
@@ -27,37 +19,43 @@ export const links: LinksFunction = () => {
   ];
 };
 
+const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
+  const hasChannels = existingChannels?.length > 0;
 
-const ChannelAdmin = ({
-  existingChannels,
-}: ChannelAdminProps) => {
   return (
     <>
-      {existingChannels?.length === 0 ? (
-        <div>Please create a channel</div>
+      {!hasChannels ? (
+        <div className='pe-2 '>
+          Please add a channel <i className='bi-arrow-bar-right' />
+        </div>
       ) : (
         <Form method='post'>
-          <label className='p-2 align-middle' id='activate'>
-            Select Channel
-          </label>
+          <div className='d-flex text-center justify-content-between align-items-center px-4'>
+            <div className='d-flex px-4 align-items-center'>
+              <label className='p-2 align-middle' id='activate'>
+                Channels:
+              </label>
 
-          <select
-            name='channelId'
-            id='channelId'
-            className={`mt-1 align-middle`}
-          >
-            {existingChannels.map((c: Channel) => {
-              const id = c.channelId.toString();
-              return (
-                <option key={id} value={id}>
-                  {c.name}
-                </option>
-              );
-            })}
-          </select>
-          <button color='primary' type='submit'>
-            Show
-          </button>
+              <select
+              style={{height: 'max-content'}}
+                name='channelId'
+                id='channelId'
+                className={`form-select text-center align-middle`}
+              >
+                {existingChannels.map((c: Channel) => {
+                  const id = c.channelId.toString();
+                  return (
+                    <option key={id} value={id}>
+                      {c.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <button className='btn btn-primary' type='submit'>
+              Show
+            </button>
+          </div>
         </Form>
       )}
       <Link
@@ -67,18 +65,22 @@ const ChannelAdmin = ({
       >
         Add Channel
       </Link>
-      <Link className='navbar-link' to='deletechannel'>
-        Delete Channel
-      </Link>
+      {hasChannels && (
+        <Link className='navbar-link' to='deletechannel'>
+          Delete Channel
+        </Link>
+      )}
     </>
   );
 };
 
 export const ErrorBoundary = ({ error }: ebProps) => {
+  console.log('ErrorBoundary inner');
+  console.log({ error });
   return (
     <>
       <h1>Error</h1>
-      <p>{error}</p>
+      {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
     </>
   );
 };

@@ -39,8 +39,8 @@ export const loader: LoaderFunction = async ({ request }) => {
       existingMessages,
     };
   } catch (error) {
-    console.log('In catch of catch-try')
-    console.log({error})
+    console.log('In catch of catch-try');
+    console.log({ error });
     return {
       error,
     };
@@ -129,7 +129,7 @@ export default function App() {
 }
 
 export type ebProps = {
-  error: string;
+  error: string | Array<string>;
 };
 
 export const ErrorBoundary = ({ error }: ebProps) => {
@@ -138,7 +138,7 @@ export const ErrorBoundary = ({ error }: ebProps) => {
   return (
     <>
       <h1>Error</h1>
-      <p>{error}</p>
+      {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
     </>
   );
 };

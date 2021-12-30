@@ -62,9 +62,9 @@ const AddChannelConfirmationModal = ({
   };
 
   return (
-    <Modal autoFocus={false} isOpen={isOpen}>
-      <ModalHeader>Create Channel</ModalHeader>
-      <ModalBody>
+      <Modal autoFocus={false} isOpen={isOpen}>
+        <ModalHeader>Create Channel</ModalHeader>
+        <ModalBody>
         <h4 className='pe-2 pb-2'>Channel Name</h4>
         <input
           autoFocus

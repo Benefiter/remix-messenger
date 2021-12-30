@@ -1,4 +1,10 @@
-import { ActionFunction, Form, LinksFunction, redirect } from 'remix';
+import {
+  ActionFunction,
+  Form,
+  LinksFunction,
+  redirect,
+  useActionData,
+} from 'remix';
 import { commitSession, getSession } from '~/sessions';
 
 import {
@@ -8,6 +14,10 @@ import {
 import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
+
+type PostAddChannelFormError = {
+  channel?: boolean;
+};
 
 export const links: LinksFunction = () => {
   return [
@@ -38,6 +48,14 @@ export const action: ActionFunction = async ({ request }) => {
   } else {
     const channel = formData.get('channel') as string;
 
+    const errors: PostAddChannelFormError = {};
+    if (channel == null || channel === '') errors.channel = true;
+
+    if (Object.keys(errors).length) {
+      console.log('Returning Errors ****')
+      return errors;
+    }
+
     await addChannel(channel);
 
     session.set('activeChannel', channel);
@@ -50,30 +68,48 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 const AddChannel = () => {
+  const errors = useActionData();
+
   return (
-    <Card className='w-25 d-flex align-items-center'>
-      <CardHeader>
-        <h3>Create Channel</h3>
+    <Card
+      style={{ width: '400px', float: 'right' }}
+      className='d-flex align-items-center shadow mb-5 bg-body rounded'
+    >
+      <CardHeader className=' w-100 text-center py-4'>
+        <h3 className='mb-4'>Create Channel</h3>
         <Form method='post'>
-          <h4 className='pe-2 pb-2'>Channel Name</h4>
-          <input
-            autoFocus
-            className='w-100'
-            type='text'
-            placeholder='Enter Channel Name'
-            name='channel'
-          />
-          <button name='action' color='secondary' value='Cancel' type='submit'>
-            Cancel
-          </button>
-          <button
-            color='primary'
-            name='action'
-            value='OK'
-            type='submit'
-          >
-            OK
-          </button>
+          <div className='d-flex justify-content-between align-items-center row '>
+            <div className='pb-4'>
+              <label className='p-2 align-middle' id='activate'>
+                Channel Name:
+              </label>{' '}
+              <input
+                autoFocus
+                type='text'
+                placeholder='Enter Channel Name'
+                name='channel'
+              />
+              {errors?.channel && <div className="text-danger">Please enter a channel name</div>}
+            </div>
+            <div className='d-flex justify-content-evenly'>
+              <button
+                name='action'
+                className='btn btn-secondary'
+                value='Cancel'
+                type='submit'
+              >
+                Cancel
+              </button>
+              <button
+                className='btn btn-primary'
+                name='action'
+                value='Create'
+                type='submit'
+              >
+                Create
+              </button>
+            </div>
+          </div>
         </Form>
       </CardHeader>
     </Card>
