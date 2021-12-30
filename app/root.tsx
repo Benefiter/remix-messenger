@@ -11,7 +11,6 @@ import {
 import type { MetaFunction } from 'remix';
 import { getSession } from './sessions';
 import { env } from 'process';
-import { getChannels, getMessagesForChannels } from './channelservice';
 
 export const meta: MetaFunction = () => {
   return { title: 'New Remix App' };
@@ -25,33 +24,28 @@ export const loader: LoaderFunction = async ({ request }) => {
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
-    const {existingChannels} = await getChannels()
-
-    const {existingMessages} = await getMessagesForChannels(existingChannels);
-
     const user = session.has('userId') ? await session.get('userId') : null;
 
     return {
       user,
-      existingChannels,
-      existingMessages,
+      error: null,
     };
-  } catch (error) {
+  } catch (errors) {
     return {
-      error,
+      errors,
     };
   }
 };
 
 export default function App() {
-  const { user, error } = useLoaderData();
+  const { user, errors } = useLoaderData();
 
-  if (error) {
+  if (errors) {
     return (
       <>
         {' '}
         <h1>Error</h1>
-        <p>{error}</p>
+        <p>{errors}</p>
       </>
     );
   }
@@ -113,8 +107,6 @@ export type ebProps = {
 };
 
 export const ErrorBoundary = ({ error }: ebProps) => {
-  console.log('ErrorBoundary');
-  console.log({ error });
   return (
     <>
       <h1>Error</h1>

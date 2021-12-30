@@ -28,12 +28,15 @@ export const getMessagesForChannels = async (channels: Channel[]) => {
       return resp?.data;
     })
   )
-    .then(results =>
-      results.reduce((prev, cur) => {
-        return [...prev, ...cur];
-      }, [])
-    )
+    .then(results => {
+      return {
+        messages: results.reduce((prev, cur) => {
+          return [...prev, ...cur];
+        }, []),
+        error: null
+      };
+    })
     .catch(error => {
-      return { error };
+      return { messages: [], error };
     });
 };

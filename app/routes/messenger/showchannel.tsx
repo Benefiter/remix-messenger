@@ -1,13 +1,10 @@
-import React from 'react';
-// import '../../styles.css';
 import { Row, Col } from 'reactstrap';
-// import { useMessengerProvider } from '../Context/MessengerContext';
-import {Channel, ChannelMessage} from '../../messenger-types'
+import {ChannelMessage} from '../../messenger-types'
 import { HubConnection } from '@microsoft/signalr';
 import Message from '../../components/Message/Message';
-import { LoaderFunction } from 'remix';
+import { LoaderFunction, useLoaderData } from 'remix';
 import { getSession } from '~/sessions';
-import { getMessagesForChannels, getChannels } from '~/channelservice';
+import { getMessagesForChannels } from '~/channelservice';
 
 type ActiveChannelProps = {
   connection: HubConnection | null
@@ -26,17 +23,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 
   try {
-    const res = await getChannels();
-    const {existingChannels} = res
-
-    const existingMessages = await getMessagesForChannels(existingChannels);
-
-    const user = session.has('userId') ? await session.get('userId') : null;
+    const {messages} = await getMessagesForChannels([{channelId, name: '', messages: []}]);
+    console.log('***Show Channel messages')
+    console.log(messages)
 
     return {
-      user,
-      existingChannels,
-      existingMessages,
+      messages,
+      activeChannel
     };
   } catch (error) {
     console.log('In catch of catch-try');
@@ -48,11 +41,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 const ShowChannel = ({connection, name}: ActiveChannelProps) => {
-//   const { state } = useMessengerProvider();
-//   const { activeChannel, channels } = state;
-  const [messages, setMessages] = React.useState<ChannelMessage[]>([]);
-  const [channels, setChannels] = React.useState<Channel[]>([]);
-  const [activeChannel, setActiveChannel] = React.useState('')
+  const { messages, activeChannel} = useLoaderData();
 
   const hasActiveChannel = activeChannel !== '';
   const title = !hasActiveChannel
@@ -61,20 +50,6 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
     ? `No messages on ${activeChannel}`
     : `${messages.length} ${messages.length > 1 ? 'Messages' : 'Message'}`;
 
-  React.useEffect(() => {
-    if (activeChannel === '') {
-      setMessages([]);
-      return;
-    }
-    const channel = channels.find(c => c.name === activeChannel);
-
-    if (!channel) {
-      setMessages([]);
-      return;
-    }
-
-    setMessages(channel.messages);
-  }, [activeChannel, channels]);
 
   return (
     <div
@@ -92,8 +67,8 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
                 : ''
             }`}
           >
-            {messages?.map((m, index) => (
-              <div key={index} className='w-25 mw-25'>
+            {messages?.map((m: ChannelMessage, index: Number) => (
+              <div key={index.toString()} className='w-25 mw-25'>
                 <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
@@ -107,8 +82,8 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
                 : ''
             }`}
           >
-            {messages?.map((m, index) => (
-              <div key={index} className='w-75 mw-75'>
+            {messages?.map((m: ChannelMessage, index: Number)  => (
+              <div key={index.toString()} className='w-75 mw-75'>
                 <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
@@ -122,8 +97,8 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
                 : ''
             }`}
           >
-            {messages?.map((m, index) => (
-              <div key={index} className='w-100 mw-100'>
+            {messages?.map((m: ChannelMessage, index: Number)  => (
+              <div key={index.toString()} className='w-100 mw-100'>
                 <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
@@ -153,6 +128,7 @@ export default ShowChannel;
 // } from '~/services/signalR/signalrClient';
 // import { HubConnection } from '@microsoft/signalr';
 // import styles from '~/components/Messenger/styles.css';
+import ActiveChannel from './../../components/ActiveChannel/ActiveChannel';
 
 // export const links: LinksFunction = () => {
 //   return [

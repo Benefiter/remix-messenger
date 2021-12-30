@@ -75,8 +75,6 @@ const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
 };
 
 export const ErrorBoundary = ({ error }: ebProps) => {
-  console.log('ErrorBoundary inner');
-  console.log({ error });
   return (
     <>
       <h1>Error</h1>

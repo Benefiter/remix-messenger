@@ -52,7 +52,6 @@ export const action: ActionFunction = async ({ request }) => {
     if (channel == null || channel === '') errors.channel = true;
 
     if (Object.keys(errors).length) {
-      console.log('Returning Errors ****')
       return errors;
     }
 

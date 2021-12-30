@@ -32,8 +32,6 @@ export const action: ActionFunction = async ({ request }) => {
 
   const { channel } = formDataItems;
   const channelData = channel?.split(',');
-  console.log('DATA****');
-  console.log(channelData);
 
   session.set('activeChannelId', channelData[0]);
   session.set('activeChannel', channelData[1]);
