@@ -4,8 +4,14 @@ import { Row, Col } from 'reactstrap';
 // import { useMessengerProvider } from '../Context/MessengerContext';
 import Message from '../Message/Message';
 import {Channel, ChannelMessage} from '../../messenger-types'
+import { HubConnection } from '@microsoft/signalr';
 
-const ActiveChannel = () => {
+type ActiveChannelProps = {
+  connection: HubConnection | null
+  name: string
+}
+
+const ActiveChannel = ({connection, name}: ActiveChannelProps) => {
 //   const { state } = useMessengerProvider();
 //   const { activeChannel, channels } = state;
   const [messages, setMessages] = React.useState<ChannelMessage[]>([]);
@@ -52,7 +58,7 @@ const ActiveChannel = () => {
           >
             {messages?.map((m, index) => (
               <div key={index} className='w-25 mw-25'>
-                <Message message={m} />
+                <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
           </div>
@@ -67,7 +73,7 @@ const ActiveChannel = () => {
           >
             {messages?.map((m, index) => (
               <div key={index} className='w-75 mw-75'>
-                <Message message={m} />
+                <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
           </div>
@@ -82,7 +88,7 @@ const ActiveChannel = () => {
           >
             {messages?.map((m, index) => (
               <div key={index} className='w-100 mw-100'>
-                <Message message={m} />
+                <Message message={m} connection={connection} user={name}/>
               </div>
             ))}
           </div>

@@ -1,52 +1,27 @@
 import { Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import React from 'react';
-import {
-  startSignalRConnection,
-  stopSignalRConnection,
-} from '../../services/signalR/signalrClient';
 import MessengerButton from '../Buttons/MessengerButton';
 import { Channel, ChannelMessage } from '~/messenger-types';
-import { LoaderFunction, useLoaderData } from 'remix';
 import { HubConnection } from '@microsoft/signalr';
 
 type AddChannelConfirmationModalProps = {
   confirmationAction: () => void;
   cancelAction: () => void;
   isOpen: boolean;
+  connection: HubConnection | null
 };
-
-export const loader: LoaderFunction = async ({params}) => {
-  console.log('***params');
-  console.log({params});
-  return {connection: startSignalRConnection()}
-};
-
 
 const AddChannelConfirmationModal = ({
   confirmationAction,
   cancelAction,
   isOpen,
+  connection
 }: AddChannelConfirmationModalProps) => {
-  const {connection} = useLoaderData();
   const [name, setName] = React.useState('');
   const [activate, setActivate] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [clientConnection] =
     React.useState<HubConnection | null>(connection);
-
-  console.log('AddchannelConfirmationModal ');
-  console.log({clientConnection})
-
-  React.useEffect(() => {
-    console.log('AddchannelConfiramtionModl useEffect *****')
-    return () => {
-      clientConnection && stopSignalRConnection(clientConnection);
-    };
-  }, []);
-
-  // React.useEffect(() => {
-  //   setError(channels?.some(c => c.name === name));
-  // }, [name]);
 
   React.useEffect(() => {
     if (!isOpen) {

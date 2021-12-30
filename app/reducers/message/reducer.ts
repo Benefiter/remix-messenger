@@ -23,9 +23,6 @@ export const messageReducer = (
 ) => {
   const { name, channelId } = action.payload;
 
-  console.log('At head of reducer****');
-  console.log({ state, action });
-
   switch (action.type) {
     case Actions.setUser:
       const { user } = action.payload;
@@ -34,8 +31,6 @@ export const messageReducer = (
           user,
           stats: updateStats(state),
       };
-      console.log('Reducer: setUser');
-      console.log({ newState });
 
       return newState;
     case Actions.addChannel:
@@ -157,7 +152,7 @@ const addMessagesToChannel = (
   messages: ChannelMessage[] | undefined
 ) => {
   const updatedChannels =
-    state.channels === [] ? [] : cloneDeep(state.channels);
+    state.channels.length === 0 ? [] : cloneDeep(state.channels);
 
   messages?.forEach(m => {
     const channel = updatedChannels.find(c => c.channelId === m.channelId);
@@ -177,7 +172,7 @@ const addMessagesToChannel = (
 
 const addChannels = (state: MessengerState, channels: Channel[]) => {
   const updatedChannels =
-    state.channels === [] ? [] : cloneDeep(state.channels);
+    state.channels.length === 0 ? [] : cloneDeep(state.channels);
 
   channels?.forEach(c => {
     if (!channelIdExists(updatedChannels, c.channelId))

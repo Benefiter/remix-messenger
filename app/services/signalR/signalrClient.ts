@@ -48,7 +48,7 @@ const subscribeToPortalChanges = (signalrClient: HubConnection) => {
   }
 };
 
-export function startSignalRConnection() {
+export const startSignalRConnection = async () => {
   console.log("####### startSignalRConnection called")
   const signalrClient = new HubConnectionBuilder()
     .withUrl(BASE_BACKEND_URL)
@@ -58,7 +58,7 @@ export function startSignalRConnection() {
   const consoleLog = canConsoleLog();
   let conn = signalrClient;
 
-  conn
+  await conn
     .start()
     .then(() => {
       conn.invoke('SubscribeToChannelsChannel');

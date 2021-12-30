@@ -1,8 +1,10 @@
 import { Button, Offcanvas, OffcanvasBody, OffcanvasHeader } from 'reactstrap';
-import { useMessengerProvider } from '../Context/MessengerContext';
 
-const Sidebar = () => {
-  const { sidebarIsOpen, toggleSidebar } = useMessengerProvider();
+type SidebarProps = {
+  sidebarIsOpen: boolean,
+  toggleSidebar: () => void
+}
+const Sidebar = ({sidebarIsOpen, toggleSidebar}: SidebarProps) => {
 
   return (
     <>

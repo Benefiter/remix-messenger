@@ -13,8 +13,6 @@ import { getSession } from './sessions';
 import { env } from 'process';
 import axios from 'axios';
 import { Channel } from './messenger-types';
-import { MessengerProvider } from './components/Context/MessengerContext';
-import React from 'react';
 
 export const meta: MetaFunction = () => {
   return { title: 'New Remix App' };
@@ -27,18 +25,26 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-  const res = await axios.get('https://localhost:5001/channels');
-  const existingChannels = res.data;
+  try {
+    const res = await axios.get('https://localhost:5001/channels');
+    const existingChannels = res.data;
 
-  const existingMessages = await getChannelMessages(existingChannels);
+    const existingMessages = await getChannelMessages(existingChannels);
 
-  const user = session.has('userId') ? await session.get('userId') : null;
+    const user = session.has('userId') ? await session.get('userId') : null;
 
-  return {
-    user,
-    existingChannels,
-    existingMessages,
-  };
+    return {
+      user,
+      existingChannels,
+      existingMessages,
+    };
+  } catch (error) {
+    console.log('In catch of catch-try')
+    console.log({error})
+    return {
+      error,
+    };
+  }
 };
 
 const getChannelMessages = async (channels: Channel[]) => {
@@ -58,11 +64,18 @@ const getChannelMessages = async (channels: Channel[]) => {
 };
 
 export default function App() {
-  const { user } = useLoaderData();
+  const { user, error } = useLoaderData();
 
-  React.useEffect(() => {
-    console.log('Default useEffect for App')
-  }, [])
+  if (error) {
+    return (
+      <>
+        {' '}
+        <h1>Error</h1>
+        <p>{error}</p>
+      </>
+    );
+  }
+
   const hasUser = user !== null;
   return (
     <html lang='en'>
@@ -84,32 +97,28 @@ export default function App() {
       </head>
       <body>
         <>
-          <MessengerProvider>
+          {!hasUser && (
             <>
-              {!hasUser && (
-                <>
-                  <ul>
-                    <li>
-                      <Link style={{ margin: '5px' }} to='/posts'>
-                        Posts
-                      </Link>
-                    </li>
-                    <li>
-                      <Link style={{ margin: '5px' }} to='/admin'>
-                        Admin
-                      </Link>
-                    </li>
-                    <li>
-                      <Link style={{ margin: '5px' }} to='/login'>
-                        Messenger Login
-                      </Link>
-                    </li>
-                  </ul>
-                </>
-              )}
-              <Outlet />
+              <ul>
+                <li>
+                  <Link style={{ margin: '5px' }} to='/posts'>
+                    Posts
+                  </Link>
+                </li>
+                <li>
+                  <Link style={{ margin: '5px' }} to='/admin'>
+                    Admin
+                  </Link>
+                </li>
+                <li>
+                  <Link style={{ margin: '5px' }} to='/login'>
+                    Messenger Login
+                  </Link>
+                </li>
+              </ul>
             </>
-          </MessengerProvider>
+          )}
+          <Outlet />
         </>
         <ScrollRestoration />
         {/* <Scripts /> */}
@@ -118,3 +127,18 @@ export default function App() {
     </html>
   );
 }
+
+export type ebProps = {
+  error: string;
+};
+
+export const ErrorBoundary = ({ error }: ebProps) => {
+  console.log('ErrorBoundary');
+  console.log({ error });
+  return (
+    <>
+      <h1>Error</h1>
+      <p>{error}</p>
+    </>
+  );
+};

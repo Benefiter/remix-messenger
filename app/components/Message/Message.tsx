@@ -3,20 +3,21 @@ import moment from 'moment';
 import { Actions } from '../../reducers/message/actions';
 import { useMessengerProvider } from '../Context/MessengerContext';
 import { ChannelMessage } from '~/messenger-types';
+import { HubConnection } from '@microsoft/signalr';
 
 type MessageProps = {
   message: ChannelMessage
+  connection: HubConnection | null
+  user: string
 }
 
-const Message = ({message}: MessageProps) => {
+const Message = ({message, connection, user}: MessageProps) => {
   const { author, content, createdOn, messageId, channelId } = message;
-  const { state, dispatch, connected } = useMessengerProvider();
-  const { clientConnection, user } = state;
-
+  const { dispatch, connected } = useMessengerProvider();
   const deleteMessage = () => {
     if (connected && !connected()) return;
 
-    clientConnection.invoke(
+    connection?.invoke(
       'RemoveChannelMessage',
       Number(channelId),
       Number(messageId)
