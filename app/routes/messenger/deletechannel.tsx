@@ -7,7 +7,6 @@ import {
   useLoaderData,
 } from 'remix';
 import { commitSession, getSession } from '~/sessions';
-import axios from 'axios';
 
 import {
   startSignalRConnection,
@@ -17,6 +16,8 @@ import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
 import { Channel } from '~/messenger-types';
+import { getFormDataItemsFromRequest } from '~/request-form-data-service';
+import { getChannels } from '~/channelservice';
 
 export const links: LinksFunction = () => {
   return [
@@ -28,12 +29,9 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const res = await axios.get('https://localhost:5001/channels');
-  const channels = res.data;
+  const {existingChannels} = await getChannels()
 
-  return {
-    channels,
-  };
+  return {channels: existingChannels}
 };
 
 const deleteChannel = async (channelId: string) => {
@@ -49,16 +47,14 @@ const deleteChannel = async (channelId: string) => {
 
 export const action: ActionFunction = async ({ request }) => {
   let session = await getSession(request.headers.get('Cookie'));
-  const formData = await request.formData();
 
-  console.log({ formData });
+  const formDataItems = await getFormDataItemsFromRequest(request, ['action', 'channel'])
+  const {action} = formDataItems;
 
-  const action = formData.get('action');
   if (action === 'Cancel') {
     return redirect('/messenger');
   } else {
-    const channel = formData.get('channel') as string;
-    console.log({ channel });
+    const {channel} = formDataItems
 
     await deleteChannel(channel);
     const activeChannel = await session.get('activeChannel');

@@ -5,11 +5,47 @@ import { Row, Col } from 'reactstrap';
 import {Channel, ChannelMessage} from '../../messenger-types'
 import { HubConnection } from '@microsoft/signalr';
 import Message from '../../components/Message/Message';
+import { LoaderFunction } from 'remix';
+import { getSession } from '~/sessions';
+import { getMessagesForChannels, getChannels } from '~/channelservice';
 
 type ActiveChannelProps = {
   connection: HubConnection | null
   name: string
 }
+
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getSession(request.headers.get('Cookie'));
+
+  const activeChannel = session.get('activeChannel');
+  const channelId = session.get('activeChannelId')
+
+  console.log('Show Channel')
+  console.log({activeChannel, channelId})
+
+
+  try {
+    const res = await getChannels();
+    const {existingChannels} = res
+
+    const existingMessages = await getMessagesForChannels(existingChannels);
+
+    const user = session.has('userId') ? await session.get('userId') : null;
+
+    return {
+      user,
+      existingChannels,
+      existingMessages,
+    };
+  } catch (error) {
+    console.log('In catch of catch-try');
+    console.log({ error });
+    return {
+      error,
+    };
+  }
+};
 
 const ShowChannel = ({connection, name}: ActiveChannelProps) => {
 //   const { state } = useMessengerProvider();

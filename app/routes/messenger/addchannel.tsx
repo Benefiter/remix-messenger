@@ -14,6 +14,7 @@ import {
 import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
+import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -40,13 +41,12 @@ const addChannel = async (channel: string) => {
 
 export const action: ActionFunction = async ({ request }) => {
   let session = await getSession(request.headers.get('Cookie'));
-  const formData = await request.formData();
+  const formData = await getFormDataItemsFromRequest(request, ['action', 'channel'])
 
-  const action = formData.get('action');
+  const {action, channel} = formData
   if (action === 'Cancel') {
     return redirect('/messenger');
   } else {
-    const channel = formData.get('channel') as string;
 
     const errors: PostAddChannelFormError = {};
     if (channel == null || channel === '') errors.channel = true;

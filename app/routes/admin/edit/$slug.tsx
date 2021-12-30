@@ -14,11 +14,9 @@ import React from 'react';
 export const action: ActionFunction = async ({ request }) => {
     await new Promise(res => setTimeout(res, 1000));
   
-    const formData = await request.formData();
+    const formData = await getFormDataItemsFromRequest(request, ['title', 'slug', 'html'])
+    const {title, slug, html} = formData
   
-    const title = formData.get('title');
-    const slug = formData.get('slug');
-    const html = formData.get('html');
   
     const errors: PostFormError = {};
     if (!title) errors.title = true;

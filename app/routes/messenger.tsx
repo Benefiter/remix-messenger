@@ -7,18 +7,15 @@ import {
   useLoaderData,
 } from 'remix';
 import { commitSession, getSession } from '~/sessions';
-import axios from 'axios';
 import { env } from 'process';
-import { Channel, ChannelMessage } from '~/messenger-types';
 import Layout from '~/components/Layout';
 
 import React from 'react';
-import {
-  startSignalRConnection,
-  stopSignalRConnection,
-} from '~/services/signalR/signalrClient';
+import { startSignalRConnection } from '~/services/signalR/signalrClient';
 import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
+import { getChannels, getMessagesForChannels } from '~/channelservice';
+import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 
 export const links: LinksFunction = () => {
   return [
@@ -31,12 +28,15 @@ export const links: LinksFunction = () => {
 
 export const action: ActionFunction = async ({ request }) => {
   let session = await getSession(request.headers.get('Cookie'));
-  const formData = await request.formData();
+  const formDataItems = await getFormDataItemsFromRequest(request, ['channel']);
 
-  const channelId = formData.get('channelId');
-  console.log({ channelId });
+  const { channel } = formDataItems;
+  const channelData = channel?.split(',');
+  console.log('DATA****');
+  console.log(channelData);
 
-  session.set('activeChannelId', channelId);
+  session.set('activeChannelId', channelData[0]);
+  session.set('activeChannel', channelData[1]);
   return redirect('/messenger/showchannel', {
     headers: {
       'Set-Cookie': await commitSession(session),
@@ -48,36 +48,21 @@ export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-  const res = await axios.get('https://localhost:5001/channels');
-  const existingChannels = res.data;
-  const existingMessages = await getChannelMessages(existingChannels);
+  const {existingChannels} = await getChannels()
+  const {existingMessages, error} = await getMessagesForChannels(existingChannels);
+  const messages = error == null ? existingMessages : [];
 
   return {
     connection: startSignalRConnection(),
     loginUser: session.has('userId') ? await session.get('userId') : null,
     existingChannels,
-    existingMessages,
+    messages,
+    error,
   };
 };
 
-const getChannelMessages = async (channels: Channel[]) => {
-  return Promise.all(
-    channels.map(async c => {
-      let resp;
-      resp = await axios.get(
-        `https://localhost:5001/channels/${c.channelId}/messages`
-      );
-      return resp?.data;
-    })
-  ).then(results =>
-    results.reduce((prev, cur) => {
-      return [...prev, ...cur];
-    }, [])
-  );
-};
-
 const Messenger = () => {
-  const { existingChannels, existingMessages, loginUser, connection } =
+  const { existingChannels, messages, loginUser, connection } =
     useLoaderData();
   const [clientConnection] = React.useState<HubConnection | null>(connection);
 
@@ -85,7 +70,7 @@ const Messenger = () => {
     <>
       <Layout
         existingChannels={existingChannels}
-        existingMessages={existingMessages}
+        existingMessages={messages}
         loginUser={loginUser}
         clientConnection={clientConnection}
       >

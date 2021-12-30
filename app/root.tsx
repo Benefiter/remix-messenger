@@ -11,8 +11,7 @@ import {
 import type { MetaFunction } from 'remix';
 import { getSession } from './sessions';
 import { env } from 'process';
-import axios from 'axios';
-import { Channel } from './messenger-types';
+import { getChannels, getMessagesForChannels } from './channelservice';
 
 export const meta: MetaFunction = () => {
   return { title: 'New Remix App' };
@@ -26,10 +25,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
-    const res = await axios.get('https://localhost:5001/channels');
-    const existingChannels = res.data;
+    const {existingChannels} = await getChannels()
 
-    const existingMessages = await getChannelMessages(existingChannels);
+    const {existingMessages} = await getMessagesForChannels(existingChannels);
 
     const user = session.has('userId') ? await session.get('userId') : null;
 
@@ -39,28 +37,10 @@ export const loader: LoaderFunction = async ({ request }) => {
       existingMessages,
     };
   } catch (error) {
-    console.log('In catch of catch-try');
-    console.log({ error });
     return {
       error,
     };
   }
-};
-
-const getChannelMessages = async (channels: Channel[]) => {
-  return Promise.all(
-    channels.map(async c => {
-      let resp;
-      resp = await axios.get(
-        `https://localhost:5001/channels/${c.channelId}/messages`
-      );
-      return resp?.data;
-    })
-  ).then(results =>
-    results.reduce((prev, cur) => {
-      return [...prev, ...cur];
-    }, [])
-  );
 };
 
 export default function App() {

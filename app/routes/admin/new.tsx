@@ -2,6 +2,7 @@ import { useActionData, useTransition, redirect, Form } from 'remix';
 import type { ActionFunction } from 'remix';
 import { createPost } from '~/posts';
 import invariant from 'tiny-invariant';
+import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 
 export type PostFormError = {
   title?: boolean;
@@ -12,11 +13,8 @@ export type PostFormError = {
 export const action: ActionFunction = async ({ request }) => {
   await new Promise(res => setTimeout(res, 1000));
 
-  const formData = await request.formData();
-
-  const title = formData.get('title');
-  const slug = formData.get('slug');
-  const markdown = formData.get('markdown');
+  const formData = await getFormDataItemsFromRequest(request, ['title', 'slug', 'markdown'])
+  const {title, slug, markdown} = formData
 
   const errors: PostFormError = {};
   if (!title) errors.title = true;

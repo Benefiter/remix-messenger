@@ -38,14 +38,14 @@ const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
 
               <select
               style={{height: 'max-content'}}
-                name='channelId'
-                id='channelId'
+                name='channel'
+                id='channel'
                 className={`form-select text-center align-middle`}
               >
                 {existingChannels.map((c: Channel) => {
                   const id = c.channelId.toString();
                   return (
-                    <option key={id} value={id}>
+                    <option key={id} value={[id, c.name]}>
                       {c.name}
                     </option>
                   );
@@ -53,7 +53,7 @@ const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
               </select>
             </div>
             <button className='btn btn-primary' type='submit'>
-              Show
+              Select
             </button>
           </div>
         </Form>
