@@ -10,12 +10,13 @@ import { commitSession, getSession } from '~/sessions';
 import { env } from 'process';
 import Layout from '~/components/Layout';
 
-import React from 'react';
 import { startSignalRConnection } from '~/services/signalR/signalrClient';
-import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { getChannels, getMessagesForChannels } from '~/channelservice';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
+import { HubConnection, HubConnectionState } from '@microsoft/signalr';
+import { Channel, ChannelMessage } from '~/messenger-types';
+import { ebProps } from '~/root';
 
 export const links: LinksFunction = () => {
   return [
@@ -26,11 +27,45 @@ export const links: LinksFunction = () => {
   ];
 };
 
+type SendMesasgeArgs = {
+  clientConnection: HubConnection,
+  message: string,
+  channelId: string,
+  user: string
+}
+
+  const sendMessage = ({clientConnection, message, channelId, user} : SendMesasgeArgs ) => {
+  if (!clientConnection || clientConnection.state != HubConnectionState.Connected) return;
+
+  clientConnection
+    .invoke('AddChannelMessage', Number(channelId), {
+      channelId: Number(channelId),
+      author: user,
+      content: message,
+    }).then(msg => console.log("SENT MESSAGE"))
+};
+
 export const action: ActionFunction = async ({ request }) => {
   let session = await getSession(request.headers.get('Cookie'));
-  const formDataItems = await getFormDataItemsFromRequest(request, ['channel']);
+  const channelId = await session.get('activeChannelId');
+  const user = await session.get('userId');
 
-  const { channel } = formDataItems;
+  const formDataItems = await getFormDataItemsFromRequest(request, ['channel', 'message']);
+
+  const { channel, message } = formDataItems;
+
+  console.log('formdataitems')
+  console.log(formDataItems)
+  console.log('action of send footer');
+  console.log(message);
+
+
+  if (message != null) {
+    const clientConnection = await startSignalRConnection();
+    sendMessage({clientConnection, message, channelId, user})
+    return redirect('/messenger/showchannel')
+  }
+
   const channelData = channel?.split(',');
 
   session.set('activeChannelId', channelData[0]);
@@ -46,34 +81,48 @@ export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-  const {existingChannels} = await getChannels()
-  const {existingMessages, error} = await getMessagesForChannels(existingChannels);
-  const messages = error == null ? existingMessages : [];
+  const { channels } = await getChannels();
+  const { messages, error } = await getMessagesForChannels(channels);
+
+  const activeChannel = await session.get('activeChannel');
+  const channelId = await session.get('activeChannelId');
 
   return {
     connection: startSignalRConnection(),
     loginUser: session.has('userId') ? await session.get('userId') : null,
-    existingChannels,
+    channels: channels,
     messages,
     error,
+    channelId,
+    activeChannel,
   };
 };
 
+export type SessionState = {
+  channels: Channel[];
+  messages: ChannelMessage[];
+  loginUser: string;
+  clientConnection: HubConnection | null;
+  channelId: string;
+  activeChannel: string;
+};
+
 const Messenger = () => {
-  const { existingChannels, messages, loginUser, connection } =
-    useLoaderData();
-  const [clientConnection] = React.useState<HubConnection | null>(connection);
+  const sessionState: SessionState = useLoaderData();
 
   return (
     <>
-      <Layout
-        existingChannels={existingChannels}
-        existingMessages={messages}
-        loginUser={loginUser}
-        clientConnection={clientConnection}
-      >
+      <Layout sessionState={sessionState}>
         <Outlet />
       </Layout>
+    </>
+  );
+};
+export const ErrorBoundary = ({ error }: ebProps) => {
+  return (
+    <>
+      <h1>Messenger Error</h1>
+      {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { Row, Col } from 'reactstrap';
-import {ChannelMessage} from '../../messenger-types'
+import { ChannelMessage } from '../../messenger-types';
 import { HubConnection } from '@microsoft/signalr';
 import Message from '../../components/Message/Message';
 import { LoaderFunction, useLoaderData } from 'remix';
@@ -7,29 +7,32 @@ import { getSession } from '~/sessions';
 import { getMessagesForChannels } from '~/channelservice';
 
 type ActiveChannelProps = {
-  connection: HubConnection | null
-  name: string
-}
-
+  connection: HubConnection | null;
+  name: string;
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
 
-  const activeChannel = session.get('activeChannel');
-  const channelId = session.get('activeChannelId')
+  const activeChannel = await session.get('activeChannel');
+  const channelId = await session.get('activeChannelId');
 
-  console.log('Show Channel')
-  console.log({activeChannel, channelId})
-
+  console.log('Show Channel');
+  console.log({ activeChannel, channelId });
 
   try {
-    const {messages} = await getMessagesForChannels([{channelId, name: '', messages: []}]);
-    console.log('***Show Channel messages')
-    console.log(messages)
+    const messageResults = await getMessagesForChannels([
+      { channelId, name: '', messages: [] },
+    ]);
+    console.log('***Show Channel messages');
+    console.log(messageResults)
+
+    const {messages} = messageResults
+    console.log(messages);
 
     return {
       messages,
-      activeChannel
+      activeChannel,
     };
   } catch (error) {
     console.log('In catch of catch-try');
@@ -40,8 +43,8 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 };
 
-const ShowChannel = ({connection, name}: ActiveChannelProps) => {
-  const { messages, activeChannel} = useLoaderData();
+const ShowChannel = ({ connection, name }: ActiveChannelProps) => {
+  const { messages, activeChannel } = useLoaderData();
 
   const hasActiveChannel = activeChannel !== '';
   const title = !hasActiveChannel
@@ -49,7 +52,6 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
     : messages.length === 0
     ? `No messages on ${activeChannel}`
     : `${messages.length} ${messages.length > 1 ? 'Messages' : 'Message'}`;
-
 
   return (
     <div
@@ -69,7 +71,7 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
           >
             {messages?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-25 mw-25'>
-                <Message message={m} connection={connection} user={name}/>
+                <Message message={m} connection={connection} user={name} />
               </div>
             ))}
           </div>
@@ -82,9 +84,9 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
                 : ''
             }`}
           >
-            {messages?.map((m: ChannelMessage, index: Number)  => (
+            {messages?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-75 mw-75'>
-                <Message message={m} connection={connection} user={name}/>
+                <Message message={m} connection={connection} user={name} />
               </div>
             ))}
           </div>
@@ -97,9 +99,9 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
                 : ''
             }`}
           >
-            {messages?.map((m: ChannelMessage, index: Number)  => (
+            {messages?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-100 mw-100'>
-                <Message message={m} connection={connection} user={name}/>
+                <Message message={m} connection={connection} user={name} />
               </div>
             ))}
           </div>
@@ -110,9 +112,6 @@ const ShowChannel = ({connection, name}: ActiveChannelProps) => {
 };
 
 export default ShowChannel;
-
-
-
 
 // import { ActionFunction, LinksFunction, LoaderFunction, Outlet, redirect, useLoaderData } from 'remix';
 // import { commitSession, getSession } from '~/sessions';
@@ -159,13 +158,13 @@ import ActiveChannel from './../../components/ActiveChannel/ActiveChannel';
 //   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 //   const res = await axios.get('https://localhost:5001/channels');
-//   const existingChannels = res.data;
-//   const existingMessages = await getChannelMessages(existingChannels);
+//   const channels = res.data;
+//   const existingMessages = await getChannelMessages(channels);
 
 //   return {
 //     connection: startSignalRConnection(),
 //     loginUser: session.has('userId') ? await session.get('userId') : null,
-//     existingChannels,
+//     channels,
 //     existingMessages,
 //   };
 // };
@@ -188,7 +187,7 @@ import ActiveChannel from './../../components/ActiveChannel/ActiveChannel';
 
 // const Index = () => {
 //   const {
-//     existingChannels,
+//     channels,
 //     existingMessages,
 //     loginUser,
 //     connection,
@@ -233,13 +232,13 @@ import ActiveChannel from './../../components/ActiveChannel/ActiveChannel';
 
 //       clientConnection.on('channelDeleted', onChannelDeletedCallback);
 
-//       existingChannels.forEach((c: Channel) => {
+//       channels.forEach((c: Channel) => {
 //         subscribeToChannelMessageUpdates(c.channelId);
 //       });
 //     }
 
 //     return () => {
-//       existingChannels.forEach((c: Channel) =>
+//       channels.forEach((c: Channel) =>
 //         unsubscribeFromChannelMessageUpdated(c.channelId)
 //       );
 //       clientConnection?.off('channelAdded', onChannelAddedCallback);
@@ -247,12 +246,12 @@ import ActiveChannel from './../../components/ActiveChannel/ActiveChannel';
 //       clientConnection?.off('channelDeleted', onChannelDeletedCallback);
 //       clientConnection && stopSignalRConnection(clientConnection);
 //     };
-//   }, [existingMessages, existingChannels]);
+//   }, [existingMessages, channels]);
 
 //   return (
 //     <>
 //       <Layout
-//         existingChannels={existingChannels}
+//         channels={channels}
 //         existingMessages={existingMessages}
 //         loginUser={loginUser}
 //         clientConnection={clientConnection}

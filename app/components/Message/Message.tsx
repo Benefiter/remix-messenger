@@ -29,7 +29,7 @@ const Message = ({message, connection, user}: MessageProps) => {
     <Card className='m-2'>
       <CardBody >
         <div title="Delete" className={`${iconClass}`} onClick={() => deleteMessage()}>
-          <i className='bi-x-lg d-flex justify-content-end' />
+          <i className='bi-x-lg d-flex justify-content-end' />Pmess
         </div>
         <div className='message-header'>
           <div className="">{`Sender: ${author}`}</div>

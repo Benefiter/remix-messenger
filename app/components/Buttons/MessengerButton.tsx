@@ -4,7 +4,7 @@ type MessengerButtonProps = {
   name: string,
   title?: string,
   disabled?: boolean,
-  clickHandler: () => void,
+  clickHandler?: () => void,
   color?: string,
   className?: string,
   type?: 'submit' | 'reset' | 'button' | undefined;
@@ -18,6 +18,7 @@ const MessengerButton = ({name, title, disabled, clickHandler, color, className,
         title={title}
         className={className}
         type={type}
+        name={name}
       >
         {name}
       </Button>

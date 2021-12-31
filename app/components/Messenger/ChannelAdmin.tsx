@@ -1,13 +1,10 @@
-import { Channel, ChannelMessage } from '~/messenger-types';
-import { HubConnection } from '@microsoft/signalr';
+import { Channel } from '~/messenger-types';
 import { Form, Link, LinksFunction } from 'remix';
 import styles from '~/components/Messenger/styles.css';
 import { ebProps } from '~/root';
 
 type ChannelAdminProps = {
-  existingChannels: Channel[];
-  existingMessages: ChannelMessage[];
-  connection: HubConnection | null;
+  channels: Channel[];
 };
 
 export const links: LinksFunction = () => {
@@ -19,8 +16,8 @@ export const links: LinksFunction = () => {
   ];
 };
 
-const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
-  const hasChannels = existingChannels?.length > 0;
+const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
+  const hasChannels = channels?.length > 0;
 
   return (
     <>
@@ -37,12 +34,12 @@ const ChannelAdmin = ({ existingChannels }: ChannelAdminProps) => {
               </label>
 
               <select
-              style={{height: 'max-content'}}
+                style={{ height: 'max-content' }}
                 name='channel'
                 id='channel'
                 className={`form-select text-center align-middle`}
               >
-                {existingChannels.map((c: Channel) => {
+                {channels.map((c: Channel) => {
                   const id = c.channelId.toString();
                   return (
                     <option key={id} value={[id, c.name]}>

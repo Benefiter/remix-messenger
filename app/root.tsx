@@ -19,8 +19,6 @@ export const meta: MetaFunction = () => {
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await getSession(request.headers.get('Cookie'));
 
-  session.get('userId');
-
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {

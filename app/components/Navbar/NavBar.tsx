@@ -1,26 +1,14 @@
-import {
-  Collapse,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-} from 'reactstrap';
-import { Channel, ChannelMessage } from '~/messenger-types';
-
+import { Collapse, Nav, Navbar, NavbarBrand, NavbarToggler } from 'reactstrap';
+import { SessionState } from '~/routes/messenger';
 import ChannelAdmin from '../Messenger/ChannelAdmin';
-import { HubConnection } from '@microsoft/signalr';
-import { Outlet } from 'remix';
 
 type NavBarProps = {
-  existingChannels: Channel[],
-  existingMessages: ChannelMessage[],
-  loginUser: string,
-  clientConnection: HubConnection | null,
-  toggleSidebar: () => void
-}
+  sessionState: SessionState;
+  toggleSidebar: () => void;
+};
 
-const NavBar = ({existingChannels, existingMessages, loginUser, clientConnection, toggleSidebar}: NavBarProps) => {
- 
+const NavBar = ({ sessionState, toggleSidebar }: NavBarProps) => {
+  const { loginUser, channels } = sessionState;
   return (
     <div>
       <Navbar id='navbar' color='secondary' expand='md' dark>
@@ -34,9 +22,9 @@ const NavBar = ({existingChannels, existingMessages, loginUser, clientConnection
         <NavbarToggler onClick={toggleSidebar} />
         <Collapse navbar>
           <Nav className='me-auto' navbar>
-              <h4 className='lh-base'> User: {loginUser}</h4>
+            <h4 className='lh-base'> User: {loginUser}</h4>
           </Nav>
-          <ChannelAdmin existingChannels={existingChannels} existingMessages={existingMessages} connection={clientConnection}/>
+          <ChannelAdmin channels={channels} />
         </Collapse>
       </Navbar>
     </div>

@@ -29,9 +29,9 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const {existingChannels} = await getChannels()
+  const {channels} = await getChannels()
 
-  return {channels: existingChannels}
+  return {channels: channels}
 };
 
 const deleteChannel = async (channelId: string) => {

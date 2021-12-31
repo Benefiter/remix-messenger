@@ -4,10 +4,10 @@ import { Channel } from '~/messenger-types';
 export const getChannels = async () => {
   try {
     const res = await axios.get('https://localhost:5001/channels');
-    const existingChannels = res.data;
+    const channels = res.data;
 
     return {
-      existingChannels,
+      channels,
     };
   } catch (error) {
     console.log('In catch of catch-try');

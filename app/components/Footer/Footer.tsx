@@ -1,18 +1,65 @@
 import footerStyles from '../../styles/Footer.module.css';
 import React, { ChangeEvent } from 'react';
 import { Row, Col } from 'reactstrap';
-import { useMessengerProvider } from '../Context/MessengerContext';
-import { Actions } from '../../reducers/message/actions';
 import MessengerButton from '../Buttons/MessengerButton';
 import { ChannelMessage } from '~/messenger-types';
+import {
+  ActionFunction,
+  Form,
+  LinksFunction,
+  LoaderFunction,
+  useLoaderData,
+} from 'remix';
+import styles from '~/styles/Footer.module.css';
+import { getSession } from '~/sessions';
+import { startSignalRConnection } from '~/services/signalR/signalrClient';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: styles,
+    },
+  ];
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getSession(request.headers.get('Cookie'));
+
+  const activeChannel = await session.get('activeChannel');
+  const channelId = await session.get('activeChannelId');
+  const user = await session.get('userId');
+
+  console.log('Footer *****');
+  console.log({ activeChannel, channelId });
+
+  return {
+    clientConnection: startSignalRConnection(),
+    channelId,
+    activeChannel,
+    user,
+  };
+};
+
+// const sendMessage = () => {
+//   if (!clientConnection) return;
+
+//   clientConnection
+//     .invoke('AddChannelMessage', Number(channelId), {
+//       channelId: Number(channelId),
+//       author: user,
+//       content: message,
+//     })
+//     .then((msg: ChannelMessage) => {
+//       setMessage('');
+//     });
+// };
 
 const Footer = () => {
-  const { state, dispatch, connected } = useMessengerProvider();
+  console.log('Footer component ******');
+  const { activeChannel, channelId, clientConnection, user } = useLoaderData();
   const [message, setMessage] = React.useState('');
   const [navbarHeight, setNavbarHeight] = React.useState(0);
-  const { activeChannel, activeChannelId, clientConnection, user, stats } =
-    state;
-
   React.useEffect(() => {
     const navbar = document.getElementById('navbar');
     setNavbarHeight(navbar?.offsetHeight ?? 0);
@@ -20,24 +67,6 @@ const Footer = () => {
 
   const updateMessage = (e: ChangeEvent<HTMLTextAreaElement>) =>
     setMessage(e.target.value);
-
-  const sendMessage = () => {
-    if (!connected) return;
-
-    clientConnection
-      .invoke('AddChannelMessage', Number(activeChannelId), {
-        channelId: Number(activeChannelId),
-        author: user,
-        content: message,
-      })
-      .then((msg: ChannelMessage) => {
-        dispatch && dispatch({
-          type: Actions.updateChannelMessages,
-          payload: { messages: [msg] },
-        });
-        setMessage('');
-      });
-  };
 
   const openInNewTab = () => {
     const newWindow = window.open(
@@ -57,33 +86,36 @@ const Footer = () => {
       <Row className='no-gutters m-0'>
         {activeChannel && (
           <Col sm='12' lg='6' className='ms-4'>
-            <Row className='no-gutters'>
-              <Col md='12' lg='10'>
-                <h4 className='pt-3'>Send Message On {activeChannel}</h4>
+            <h4 className='pt-3'>Send Message On {activeChannel}</h4>
 
-                <textarea
-                  //@ts-ignore 2339
-                  className={footerStyles.sendMessage}
-                  value={message}
-                  onChange={updateMessage}
-                ></textarea>
-              </Col>
-              <Col className=' d-flex mt-4'>
-                <div className='d-flex align-items-start'>
-                  <MessengerButton
-                    disabled={message === ''}
-                    // className='btn btn-sm bg-primary primary mt-4 mb-2'
-                    clickHandler={sendMessage}
-                    title='Send Message'
-                    name='Send'
-                  />
-                </div>
-              </Col>
-            </Row>
+            <Form method='post'>
+              <Row className='no-gutters'>
+                <Col md='12' lg='10'>
+                  <textarea
+                    //@ts-ignore 2339
+                    className={footerStyles.sendMessage}
+                    value={message}
+                    onChange={updateMessage}
+                    name='message'
+                  ></textarea>
+                </Col>
+                <Col className=' d-flex mt-4'>
+                  <div className='d-flex align-items-start'>
+                    <MessengerButton
+                      // disabled={message === ''}
+                      // className='btn btn-sm bg-primary primary mt-4 mb-2'
+                      title='Send Message'
+                      name='Send'
+                      type='submit'
+                    />
+                  </div>
+                </Col>
+              </Row>
+            </Form>
           </Col>
         )}
 
-        <Col className='d-flex align-items-center flex-column'>
+        {/* <Col className='d-flex align-items-center flex-column'>
           <>
             <div className='pt-3 h4'>Board Status</div>
             <div className='stats p-3 fw-bold text-center'>
@@ -91,8 +123,8 @@ const Footer = () => {
               <div className='pt-2 fs-6 fw-light'>{stats.lastMessageStat}</div>
             </div>
           </>
-        </Col>
-        <Col
+        </Col> */}
+        {/* <Col
           lg='2'
           className={`${
             //@ts-ignore 2339
@@ -104,7 +136,7 @@ const Footer = () => {
             title='Start a new session in a new window'
             name='New Session'
           />
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );

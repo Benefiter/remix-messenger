@@ -1,19 +1,15 @@
-import { Channel, ChannelMessage } from '~/messenger-types';
 import NavBar from './Navbar/NavBar';
 import Sidebar from './Sidebar/Sidebar';
-import { HubConnection } from '@microsoft/signalr';
 import React from 'react'
-import { Outlet } from 'remix';
+import Footer from './Footer/Footer';
+import { SessionState } from '~/routes/messenger';
 
 type LayoutProps = {
   children: React.ReactNode,
-  existingChannels: Channel[],
-  existingMessages: ChannelMessage[],
-  loginUser: string,
-  clientConnection: HubConnection | null
+  sessionState: SessionState
 }
 
-const Layout = ({ children, existingChannels, existingMessages, loginUser, clientConnection } : LayoutProps) => {
+const Layout = ({sessionState, children}: LayoutProps) => {
   const [sidebarIsOpen, setSidebarIsOpen] = React.useState(false);
   const toggleSidebar = () => {
     setSidebarIsOpen((state: boolean) => !state);
@@ -22,9 +18,10 @@ const Layout = ({ children, existingChannels, existingMessages, loginUser, clien
   return (
     <div>
       <main>
-        <NavBar existingChannels={existingChannels} existingMessages={existingMessages} loginUser={loginUser} clientConnection={clientConnection} toggleSidebar={toggleSidebar}></NavBar>
+        <NavBar sessionState={sessionState} toggleSidebar={toggleSidebar}></NavBar>
         <Sidebar sidebarIsOpen={sidebarIsOpen} toggleSidebar={toggleSidebar}/>
         {children}
+        <Footer/>
       </main>
     </div>
   );
