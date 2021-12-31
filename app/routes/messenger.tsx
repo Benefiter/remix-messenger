@@ -10,7 +10,7 @@ import { commitSession, getSession } from '~/sessions';
 import { env } from 'process';
 import Layout from '~/components/Layout';
 
-import { startSignalRConnection } from '~/services/signalR/signalrClient';
+import { startSignalRConnection, stopSignalRConnection } from '~/services/signalR/signalrClient';
 import styles from '~/components/Messenger/styles.css';
 import { getChannels, getMessagesForChannels } from '~/channelservice';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
@@ -28,42 +28,52 @@ export const links: LinksFunction = () => {
 };
 
 type SendMesasgeArgs = {
-  clientConnection: HubConnection,
-  message: string,
-  channelId: string,
-  user: string
-}
+  clientConnection: HubConnection;
+  message: string;
+  channelId: string;
+  user: string;
+};
 
-  const sendMessage = ({clientConnection, message, channelId, user} : SendMesasgeArgs ) => {
-  if (!clientConnection || clientConnection.state != HubConnectionState.Connected) return;
+const sendMessage = ({
+  clientConnection,
+  message,
+  channelId,
+  user,
+}: SendMesasgeArgs) => {
+  if (
+    !clientConnection ||
+    clientConnection.state != HubConnectionState.Connected
+  )
+    return;
 
   clientConnection
     .invoke('AddChannelMessage', Number(channelId), {
       channelId: Number(channelId),
       author: user,
       content: message,
-    }).then(msg => console.log("SENT MESSAGE"))
+    })
+    .then(msg => {
+      console.log('SENT MESSAGE')
+      stopSignalRConnection(clientConnection)
+    })
 };
 
 export const action: ActionFunction = async ({ request }) => {
   let session = await getSession(request.headers.get('Cookie'));
-  const channelId = await session.get('activeChannelId');
+  const activeChannelId = await session.get('activeChannelId');
   const user = await session.get('userId');
 
-  const formDataItems = await getFormDataItemsFromRequest(request, ['channel', 'message']);
+  const formDataItems = await getFormDataItemsFromRequest(request, [
+    'channel',
+    'message'
+  ]);
 
   const { channel, message } = formDataItems;
 
-  console.log('formdataitems')
-  console.log(formDataItems)
-  console.log('action of send footer');
-  console.log(message);
-
-
   if (message != null) {
     const clientConnection = await startSignalRConnection();
-    sendMessage({clientConnection, message, channelId, user})
-    return redirect('/messenger/showchannel')
+    sendMessage({ clientConnection, message, channelId: activeChannelId, user });
+    return redirect('/messenger/showchannel');
   }
 
   const channelData = channel?.split(',');

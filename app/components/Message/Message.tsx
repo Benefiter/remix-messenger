@@ -1,45 +1,52 @@
 import { Card, CardBody } from 'reactstrap';
 import moment from 'moment';
-import { Actions } from '../../reducers/message/actions';
-import { useMessengerProvider } from '../Context/MessengerContext';
 import { ChannelMessage } from '~/messenger-types';
-import { HubConnection } from '@microsoft/signalr';
+import { Form, useSubmit } from 'remix';
+import { MouseEvent } from 'react';
+import { ConsoleLogger } from '@microsoft/signalr/dist/esm/Utils';
 
 type MessageProps = {
-  message: ChannelMessage
-  connection: HubConnection | null
-  user: string
-}
+  message: ChannelMessage;
+  user: string;
+};
 
-const Message = ({message, connection, user}: MessageProps) => {
+const Message = ({ message, user }: MessageProps) => {
+  console.log('*****MESSSAGE')
+  console.log(message)
   const { author, content, createdOn, messageId, channelId } = message;
-  const { dispatch, connected } = useMessengerProvider();
-  const deleteMessage = () => {
-    if (connected && !connected()) return;
+  console.log(`${messageId},${channelId}`)
+  const submit = useSubmit();
 
-    connection?.invoke(
-      'RemoveChannelMessage',
-      Number(channelId),
-      Number(messageId)
-    ).then(() => dispatch && dispatch({ type: Actions.removeChannelMessage, payload: {channelId, messageId}}))
-  };
+  const iconClass = author === user ? 'enable-delete' : 'disable-delete';
 
-  const iconClass = author === user ? 'enable-delete' : 'disable-delete'
+  // const handleDelete = (
+  //   event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  // ) => {
+  //   submit({ method: 'post', name: `${messageId},${channelId}` });
+  // };
+
   return (
     <Card className='m-2'>
-      <CardBody >
-        <div title="Delete" className={`${iconClass}`} onClick={() => deleteMessage()}>
-          <i className='bi-x-lg d-flex justify-content-end' />Pmess
-        </div>
-        <div className='message-header'>
-          <div className="">{`Sender: ${author}`}</div>
-          <div>{`Received: ${moment(createdOn).format(
-            'MMM DD YYYY hh:mm:ss a'
-          )}`}</div>
-        </div>
-        <div className='message-content'>
-          <div className='p-2 text-break'>{content}</div>
-        </div>
+      <CardBody>
+        <Form method='post'>
+          <button
+            name='action'
+            value={`${messageId},${channelId}`}
+            title='Delete'
+            className={`${iconClass}`}
+          >
+            <i className='bi-x-lg d-flex justify-content-end' />
+          </button>
+          </Form>
+          <div className='message-header'>
+            <div className=''>{`Sender: ${author}`}</div>
+            <div>{`Received: ${moment(createdOn).format(
+              'MMM DD YYYY hh:mm:ss a'
+            )}`}</div>
+          </div>
+          <div className='message-content'>
+            <div className='p-2 text-break'>{content}</div>
+          </div>
       </CardBody>
     </Card>
   );

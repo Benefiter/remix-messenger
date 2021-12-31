@@ -56,8 +56,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 // };
 
 const Footer = () => {
-  console.log('Footer component ******');
-  const { activeChannel, channelId, clientConnection, user } = useLoaderData();
+  const { activeChannel } = useLoaderData();
   const [message, setMessage] = React.useState('');
   const [navbarHeight, setNavbarHeight] = React.useState(0);
   React.useEffect(() => {
