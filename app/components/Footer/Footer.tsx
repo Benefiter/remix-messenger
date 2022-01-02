@@ -1,19 +1,10 @@
-import footerStyles from '../../styles/Footer.module.css';
+// import footerStyles from '../../styles/Footer.module.css';
 import React, { ChangeEvent } from 'react';
 import { Row, Col } from 'reactstrap';
 import MessengerButton from '../Buttons/MessengerButton';
-import { ChannelMessage } from '~/messenger-types';
-import {
-  ActionFunction,
-  Form,
-  LinksFunction,
-  LoaderFunction,
-  useLoaderData,
-} from 'remix';
-import styles from '~/styles/Footer.module.css';
-import { getSession } from '~/sessions';
-import { startSignalRConnection } from '~/services/signalR/signalrClient';
-
+import { Form, LinksFunction, LoaderFunction, useLoaderData } from 'remix';
+import styles from '~/components/Messenger/styles.css';
+import { getSessionActiveChannelAndId } from '~/utils/session.server';
 export const links: LinksFunction = () => {
   return [
     {
@@ -24,39 +15,16 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get('Cookie'));
-
-  const activeChannel = await session.get('activeChannel');
-  const channelId = await session.get('activeChannelId');
-  const user = await session.get('userId');
-
-  console.log('Footer *****');
-  console.log({ activeChannel, channelId });
+  const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
 
   return {
-    clientConnection: startSignalRConnection(),
     channelId,
     activeChannel,
-    user,
   };
 };
 
-// const sendMessage = () => {
-//   if (!clientConnection) return;
-
-//   clientConnection
-//     .invoke('AddChannelMessage', Number(channelId), {
-//       channelId: Number(channelId),
-//       author: user,
-//       content: message,
-//     })
-//     .then((msg: ChannelMessage) => {
-//       setMessage('');
-//     });
-// };
-
 const Footer = () => {
-  const { activeChannel } = useLoaderData();
+  const { channelId, activeChannel } = useLoaderData();
   const [message, setMessage] = React.useState('');
   const [navbarHeight, setNavbarHeight] = React.useState(0);
   React.useEffect(() => {
@@ -78,8 +46,7 @@ const Footer = () => {
 
   return (
     <div
-      //@ts-ignore 2339
-      className={footerStyles.footer}
+      className='footer'
       style={{ minHeight: `calc(30vh - ${navbarHeight}px)` }}
     >
       <Row className='no-gutters m-0'>
@@ -92,11 +59,12 @@ const Footer = () => {
                 <Col md='12' lg='10'>
                   <textarea
                     //@ts-ignore 2339
-                    className={footerStyles.sendMessage}
+                    className='sendMessage'
                     value={message}
                     onChange={updateMessage}
                     name='message'
                   ></textarea>
+                  <input readOnly hidden name='channel' value={`${channelId},${activeChannel}`}/>
                 </Col>
                 <Col className=' d-flex mt-4'>
                   <div className='d-flex align-items-start'>

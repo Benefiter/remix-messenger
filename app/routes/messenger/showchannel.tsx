@@ -2,16 +2,30 @@ import { Row, Col } from 'reactstrap';
 import { ChannelMessage } from '../../messenger-types';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 import Message from '../../components/Message/Message';
-import { ActionFunction, LoaderFunction, redirect, useLoaderData } from 'remix';
-import { getSession } from '~/sessions';
+import { ActionFunction, LoaderFunction, redirect, useLoaderData, useSubmit, LinksFunction } from 'remix';
 import { getMessagesForChannels } from '~/channelservice';
-import { startSignalRConnection, stopSignalRConnection } from '~/services/signalR/signalrClient';
+import {
+  startSignalRConnection,
+  stopSignalRConnection,
+} from '~/services/signalR/signalrClient';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
+import React from 'react';
+import styles from '~/components/Messenger/styles.css';
+import { getSessionActiveChannelAndId, getUser } from '~/utils/session.server';
 
 type DeleteMessageArgs = {
   clientConnection: HubConnection;
   messageId: string;
   channelId: string;
+};
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: styles,
+    },
+  ];
 };
 
 const deleteMessage = ({
@@ -28,26 +42,26 @@ const deleteMessage = ({
   clientConnection
     ?.invoke('RemoveChannelMessage', Number(channelId), Number(messageId))
     .then(() => {
-      console.log(`Deleted message msgId=${messageId}, channelId=${channelId}`);
-      stopSignalRConnection(clientConnection)
+      stopSignalRConnection(clientConnection);
     });
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  console.log('*****ACTION FUNCION IS BEEING CALLEd ***********************************************')
-  const formDataItems = await getFormDataItemsFromRequest(request, [
-    'action'
-  ]);
-
+  const formDataItems = await getFormDataItemsFromRequest(request, ['action']);
 
   const { action } = formDataItems;
 
-  console.log('formdataitems for showchannel');
-  console.log(formDataItems);
-  console.log({ action });
+  console.log('action in showchannel action function')
+  console.log(action)
+
+  if (action === '/refresh')
+  {
+    return redirect('/messenger/showchannel');
+  }
+
   const actionData = action?.split(',');
-  const messageId = actionData[0]
-  const channelId = actionData[1]
+  const messageId = actionData[0];
+  const channelId = actionData[1];
 
   if (channelId != null && messageId != null) {
     const clientConnection = await startSignalRConnection();
@@ -57,26 +71,20 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get('Cookie'));
-
-  const activeChannel = await session.get('activeChannel');
-  const channelId = await session.get('activeChannelId');
-  const name = await session.get('userId');
+  const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
+  const name = await getUser(request)
 
   try {
     const messageResults = await getMessagesForChannels([
       { channelId, name: '', messages: [] },
     ]);
-    // console.log('***Show Channel messages');
-    // console.log(messageResults);
-
     const { messages } = messageResults;
-    // console.log(messages);
 
     return {
       messages,
       activeChannel,
       name,
+      channelId
     };
   } catch (error) {
     console.log('In catch of catch-try');
@@ -88,7 +96,47 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 const ShowChannel = () => {
-  const { messages, activeChannel, name } = useLoaderData();
+  const { messages, activeChannel, name, channelId } = useLoaderData();
+  const submit = useSubmit();
+  const [connection, setConnection] = React.useState<HubConnection | null>(
+    null
+  );
+
+  const messageRefresher = () => {
+    console.log('MessageRefresher Called ****')
+    submit(null, { method: "post", action: "/refresh" })
+  }
+
+  React.useEffect(() => {
+    const int = setInterval(() => {
+      submit(null, {method: 'post', action: '/refresh'})
+    }, 10000);
+
+    console.log('**************USE EFFECT******************************')
+    const getConnection = async () => {
+      const cc = await startSignalRConnection();
+      setConnection(cc);
+      if (cc.state === HubConnectionState.Connected) {
+        cc.invoke('SubscribeToMessageChannel', channelId)
+        cc.on('messageAdded', messageRefresher)
+        cc.on('messageDeleted', messageRefresher)
+      }
+    };
+
+    getConnection();
+
+    return () => {
+      clearInterval(int)
+      if (connection?.state === HubConnectionState.Connected)
+      {
+        connection.off('messageAdded', messageRefresher)
+        connection.off('messageDeleted', messageRefresher)
+
+      }
+      connection && stopSignalRConnection(connection);
+    };
+  }, []);
+
 
   const hasActiveChannel = activeChannel !== '';
   const title = !hasActiveChannel

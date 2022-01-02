@@ -6,17 +6,20 @@ import {
   redirect,
   useLoaderData,
 } from 'remix';
-import { commitSession, getSession } from '~/sessions';
 import { env } from 'process';
 import Layout from '~/components/Layout';
 
-import { startSignalRConnection, stopSignalRConnection } from '~/services/signalR/signalrClient';
+import {
+  startSignalRConnection,
+  stopSignalRConnection,
+} from '~/services/signalR/signalrClient';
 import styles from '~/components/Messenger/styles.css';
 import { getChannels, getMessagesForChannels } from '~/channelservice';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 import { Channel, ChannelMessage } from '~/messenger-types';
 import { ebProps } from '~/root';
+import { getSessionActiveChannelAndId, getUser, setSessionActiveChannelAndId } from '~/utils/session.server';
 
 export const links: LinksFunction = () => {
   return [
@@ -28,18 +31,18 @@ export const links: LinksFunction = () => {
 };
 
 type SendMesasgeArgs = {
-  clientConnection: HubConnection;
   message: string;
   channelId: string;
-  user: string;
+  user: string | undefined;
 };
 
-const sendMessage = ({
-  clientConnection,
+const sendMessage = async ({
   message,
   channelId,
   user,
 }: SendMesasgeArgs) => {
+  const clientConnection = await startSignalRConnection();
+
   if (
     !clientConnection ||
     clientConnection.state != HubConnectionState.Connected
@@ -49,57 +52,54 @@ const sendMessage = ({
   clientConnection
     .invoke('AddChannelMessage', Number(channelId), {
       channelId: Number(channelId),
-      author: user,
+      author: user ?? 'unkown',
       content: message,
     })
     .then(msg => {
-      console.log('SENT MESSAGE')
-      stopSignalRConnection(clientConnection)
-    })
+      stopSignalRConnection(clientConnection);
+    });
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  let session = await getSession(request.headers.get('Cookie'));
-  const activeChannelId = await session.get('activeChannelId');
-  const user = await session.get('userId');
+  const user = await getUser(request)
 
   const formDataItems = await getFormDataItemsFromRequest(request, [
     'channel',
-    'message'
+    'message',
   ]);
 
   const { channel, message } = formDataItems;
 
+  console.log('MESSENGEr ActionFunction');
+  console.log({channel, message});
+  
+  const channelData = channel?.split(',');
+
   if (message != null) {
-    const clientConnection = await startSignalRConnection();
-    sendMessage({ clientConnection, message, channelId: activeChannelId, user });
+    await sendMessage({
+      message,
+      channelId: channelData[0],
+       user: user?.username,
+    });
     return redirect('/messenger/showchannel');
   }
 
-  const channelData = channel?.split(',');
-
-  session.set('activeChannelId', channelData[0]);
-  session.set('activeChannel', channelData[1]);
-  return redirect('/messenger/showchannel', {
-    headers: {
-      'Set-Cookie': await commitSession(session),
-    },
-  });
+  return await setSessionActiveChannelAndId(request, channelData)
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get('Cookie'));
+
+  console.log('Messenger Loader ');
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   const { channels } = await getChannels();
   const { messages, error } = await getMessagesForChannels(channels);
 
-  const activeChannel = await session.get('activeChannel');
-  const channelId = await session.get('activeChannelId');
+  const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
+  const user = await getUser(request);
 
   return {
-    connection: startSignalRConnection(),
-    loginUser: session.has('userId') ? await session.get('userId') : null,
+    loginUser: user?.username ?? 'unknown',
     channels: channels,
     messages,
     error,
@@ -112,7 +112,6 @@ export type SessionState = {
   channels: Channel[];
   messages: ChannelMessage[];
   loginUser: string;
-  clientConnection: HubConnection | null;
   channelId: string;
   activeChannel: string;
 };

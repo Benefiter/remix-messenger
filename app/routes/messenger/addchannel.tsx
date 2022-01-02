@@ -5,8 +5,6 @@ import {
   redirect,
   useActionData,
 } from 'remix';
-import { commitSession, getSession } from '~/sessions';
-
 import {
   startSignalRConnection,
   stopSignalRConnection,
@@ -15,6 +13,7 @@ import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
+import { setSessionActiveChannel } from '~/utils/session.server';
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -40,14 +39,15 @@ const addChannel = async (channel: string) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  let session = await getSession(request.headers.get('Cookie'));
-  const formData = await getFormDataItemsFromRequest(request, ['action', 'channel'])
+  const formData = await getFormDataItemsFromRequest(request, [
+    'action',
+    'channel',
+  ]);
 
-  const {action, channel} = formData
+  const { action, channel } = formData;
   if (action === 'Cancel') {
     return redirect('/messenger');
   } else {
-
     const errors: PostAddChannelFormError = {};
     if (channel == null || channel === '') errors.channel = true;
 
@@ -57,12 +57,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     await addChannel(channel);
 
-    session.set('activeChannel', channel);
-    return redirect('/messenger', {
-      headers: {
-        'Set-Cookie': await commitSession(session),
-      },
-    });
+    return setSessionActiveChannel(request, channel)
   }
 };
 
@@ -88,7 +83,9 @@ const AddChannel = () => {
                 placeholder='Enter Channel Name'
                 name='channel'
               />
-              {errors?.channel && <div className="text-danger">Please enter a channel name</div>}
+              {errors?.channel && (
+                <div className='text-danger'>Please enter a channel name</div>
+              )}
             </div>
             <div className='d-flex justify-content-evenly'>
               <button

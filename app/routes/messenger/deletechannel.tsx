@@ -6,8 +6,6 @@ import {
   redirect,
   useLoaderData,
 } from 'remix';
-import { commitSession, getSession } from '~/sessions';
-
 import {
   startSignalRConnection,
   stopSignalRConnection,
@@ -18,6 +16,10 @@ import { Card, CardHeader } from 'reactstrap';
 import { Channel } from '~/messenger-types';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { getChannels } from '~/channelservice';
+import {
+  getSessionActiveChannel,
+  setSessionActiveChannel,
+} from '~/utils/session.server';
 
 export const links: LinksFunction = () => {
   return [
@@ -29,9 +31,9 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const {channels} = await getChannels()
+  const { channels } = await getChannels();
 
-  return {channels: channels}
+  return { channels: channels };
 };
 
 const deleteChannel = async (channelId: string) => {
@@ -39,33 +41,29 @@ const deleteChannel = async (channelId: string) => {
 
   if (clientConnection) {
     clientConnection.invoke('RemoveChannel', Number(channelId)).finally(() => {
-      console.log('stopping connection ********');
       stopSignalRConnection(clientConnection);
     });
   }
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  let session = await getSession(request.headers.get('Cookie'));
-
-  const formDataItems = await getFormDataItemsFromRequest(request, ['action', 'channel'])
-  const {action} = formDataItems;
+  const formDataItems = await getFormDataItemsFromRequest(request, [
+    'action',
+    'channel',
+  ]);
+  const { action } = formDataItems;
 
   if (action === 'Cancel') {
     return redirect('/messenger');
   } else {
-    const {channel} = formDataItems
+    const { channel } = formDataItems;
 
     await deleteChannel(channel);
-    const activeChannel = await session.get('activeChannel');
-    if (channel === activeChannel) {
-      session.set('activeChannel', '');
-    }
-    return redirect('/messenger', {
-      headers: {
-        'Set-Cookie': await commitSession(session),
-      },
-    });
+    const activeChannel = await getSessionActiveChannel(request);
+    return await setSessionActiveChannel(
+      request,
+      channel === activeChannel ? '' : activeChannel.toString()
+    );
   }
 };
 
@@ -109,9 +107,12 @@ const DeleteChannel = () => {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className='btn btn-primary'
-                name='action' value='Delete' type='submit'>
+                name='action'
+                value='Delete'
+                type='submit'
+              >
                 Delete
               </button>
             </div>

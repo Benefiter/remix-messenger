@@ -1,4 +1,5 @@
 import {
+  Form,
   Link,
   Links,
   LiveReload,
@@ -7,25 +8,44 @@ import {
   Outlet,
   ScrollRestoration,
   useLoaderData,
+  LinksFunction
 } from 'remix';
 import type { MetaFunction } from 'remix';
-import { getSession } from './sessions';
 import { env } from 'process';
+import globalStylesUrl from "./styles/global.css";
+import globalMediumStylesUrl from "./styles/global-medium.css";
+import globalLargeStylesUrl from "./styles/global-large.css";
+import { userloggedIn } from './utils/session.server';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: "stylesheet",
+      href: globalStylesUrl
+    },
+    {
+      rel: "stylesheet",
+      href: globalMediumStylesUrl,
+      media: "print, (min-width: 640px)"
+    },
+    {
+      rel: "stylesheet",
+      href: globalLargeStylesUrl,
+      media: "screen and (min-width: 1024px)"
+    }
+  ];
+};
 
 export const meta: MetaFunction = () => {
   return { title: 'New Remix App' };
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const session = await getSession(request.headers.get('Cookie'));
-
   env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
-    const user = session.has('userId') ? await session.get('userId') : null;
-
     return {
-      user,
+      userLoggedIn: await userloggedIn(request),
       error: null,
     };
   } catch (errors) {
@@ -36,7 +56,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function App() {
-  const { user, errors } = useLoaderData();
+  const { userLoggedIn, errors } = useLoaderData();
 
   if (errors) {
     return (
@@ -48,7 +68,6 @@ export default function App() {
     );
   }
 
-  const hasUser = user !== null;
   return (
     <html lang='en'>
       <head>
@@ -69,7 +88,7 @@ export default function App() {
       </head>
       <body>
         <>
-          {!hasUser && (
+          {!userLoggedIn && (
             <>
               <ul>
                 <li>
@@ -86,6 +105,11 @@ export default function App() {
                   <Link style={{ margin: '5px' }} to='/login'>
                     Messenger Login
                   </Link>
+                </li>
+                <li>
+                  <Form action='/test' method='post'>
+                    <button className='btn btn-primary' type='submit'>Test</button>
+                  </Form>
                 </li>
               </ul>
             </>

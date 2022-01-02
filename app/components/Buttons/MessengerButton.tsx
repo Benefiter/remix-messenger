@@ -14,7 +14,6 @@ const MessengerButton = ({name, title, disabled, clickHandler, color, className,
       <Button
         color={color ? color : 'info'}
         disabled={disabled}
-        onClick={() => {console.log('****Click Handler Called******')}}
         title={title}
         className={className}
         type={type}
