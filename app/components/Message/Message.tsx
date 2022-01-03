@@ -10,6 +10,8 @@ type MessageProps = {
 
 const Message = ({ message, user }: MessageProps) => {
   const { author, content, createdOn, messageId, channelId } = message;
+  console.log('MESSAGE COMPONENT');
+  console.log({author, user})
   const iconClass = author === user ? 'enable-delete' : 'disable-delete';
 
   return (

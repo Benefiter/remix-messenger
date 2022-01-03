@@ -5,15 +5,11 @@ import {
   redirect,
   useActionData,
 } from 'remix';
-import {
-  startSignalRConnection,
-  stopSignalRConnection,
-} from '~/services/signalR/signalrClient';
-import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { setSessionActiveChannel } from '~/utils/session.server';
+import { addChannel } from '~/utils/messenger.server';
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -26,16 +22,6 @@ export const links: LinksFunction = () => {
       href: styles,
     },
   ];
-};
-
-const addChannel = async (channel: string) => {
-  const clientConnection: HubConnection = await startSignalRConnection();
-
-  if (clientConnection) {
-    clientConnection.invoke('AddChannel', { name: channel }).finally(() => {
-      stopSignalRConnection(clientConnection);
-    });
-  }
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -55,7 +41,7 @@ export const action: ActionFunction = async ({ request }) => {
       return errors;
     }
 
-    await addChannel(channel);
+    await addChannel({name: channel});
 
     return setSessionActiveChannel(request, channel)
   }

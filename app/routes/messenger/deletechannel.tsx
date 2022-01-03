@@ -6,20 +6,15 @@ import {
   redirect,
   useLoaderData,
 } from 'remix';
-import {
-  startSignalRConnection,
-  stopSignalRConnection,
-} from '~/services/signalR/signalrClient';
-import { HubConnection } from '@microsoft/signalr';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
 import { Channel } from '~/messenger-types';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
-import { getChannels } from '~/channelservice';
 import {
   getSessionActiveChannel,
   setSessionActiveChannel,
 } from '~/utils/session.server';
+import { removeChannel, getAllChannels } from '~/utils/messenger.server';
 
 export const links: LinksFunction = () => {
   return [
@@ -31,19 +26,9 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { channels } = await getChannels();
+  const { channels } = await getAllChannels();
 
   return { channels: channels };
-};
-
-const deleteChannel = async (channelId: string) => {
-  const clientConnection: HubConnection = await startSignalRConnection();
-
-  if (clientConnection) {
-    clientConnection.invoke('RemoveChannel', Number(channelId)).finally(() => {
-      stopSignalRConnection(clientConnection);
-    });
-  }
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -58,7 +43,9 @@ export const action: ActionFunction = async ({ request }) => {
   } else {
     const { channel } = formDataItems;
 
-    await deleteChannel(channel);
+    console.log('Channel to delete *******')
+    console.log({channel});
+    await removeChannel({channelId: channel});
     const activeChannel = await getSessionActiveChannel(request);
     return await setSessionActiveChannel(
       request,

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export interface Channel {
+export interface  Channel {
   channelId: Number;
   name: string;
   messages: ChannelMessage[];

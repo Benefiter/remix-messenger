@@ -1,23 +1,12 @@
 import { Row, Col } from 'reactstrap';
 import { ChannelMessage } from '../../messenger-types';
-import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 import Message from '../../components/Message/Message';
 import { ActionFunction, LoaderFunction, redirect, useLoaderData, useSubmit, LinksFunction } from 'remix';
-import { getMessagesForChannels } from '~/channelservice';
-import {
-  startSignalRConnection,
-  stopSignalRConnection,
-} from '~/services/signalR/signalrClient';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
-import React from 'react';
 import styles from '~/components/Messenger/styles.css';
-import { getSessionActiveChannelAndId, getUser } from '~/utils/session.server';
+import { getSessionActiveChannelAndId, getUserName } from '~/utils/session.server';
+import { removeMessage, getMessagesForChannels } from '~/utils/messenger.server';
 
-type DeleteMessageArgs = {
-  clientConnection: HubConnection;
-  messageId: string;
-  channelId: string;
-};
 
 export const links: LinksFunction = () => {
   return [
@@ -26,24 +15,6 @@ export const links: LinksFunction = () => {
       href: styles,
     },
   ];
-};
-
-const deleteMessage = ({
-  clientConnection,
-  messageId,
-  channelId,
-}: DeleteMessageArgs) => {
-  if (
-    !clientConnection ||
-    clientConnection.state != HubConnectionState.Connected
-  )
-    return;
-
-  clientConnection
-    ?.invoke('RemoveChannelMessage', Number(channelId), Number(messageId))
-    .then(() => {
-      stopSignalRConnection(clientConnection);
-    });
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -61,22 +32,20 @@ export const action: ActionFunction = async ({ request }) => {
 
   const actionData = action?.split(',');
   const messageId = actionData[0];
-  const channelId = actionData[1];
 
-  if (channelId != null && messageId != null) {
-    const clientConnection = await startSignalRConnection();
-    deleteMessage({ clientConnection, messageId, channelId });
+  if (messageId != null) {
+    removeMessage({ messageId });
     return redirect('/messenger/showchannel');
   }
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
-  const name = await getUser(request)
+  const name = await getUserName(request)
 
   try {
     const messageResults = await getMessagesForChannels([
-      { channelId, name: '', messages: [] },
+      { channelId, name: '' },
     ]);
     const { messages } = messageResults;
 
@@ -96,47 +65,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 const ShowChannel = () => {
-  const { messages, activeChannel, name, channelId } = useLoaderData();
-  const submit = useSubmit();
-  const [connection, setConnection] = React.useState<HubConnection | null>(
-    null
-  );
-
-  const messageRefresher = () => {
-    console.log('MessageRefresher Called ****')
-    submit(null, { method: "post", action: "/refresh" })
-  }
-
-  React.useEffect(() => {
-    const int = setInterval(() => {
-      submit(null, {method: 'post', action: '/refresh'})
-    }, 10000);
-
-    console.log('**************USE EFFECT******************************')
-    const getConnection = async () => {
-      const cc = await startSignalRConnection();
-      setConnection(cc);
-      if (cc.state === HubConnectionState.Connected) {
-        cc.invoke('SubscribeToMessageChannel', channelId)
-        cc.on('messageAdded', messageRefresher)
-        cc.on('messageDeleted', messageRefresher)
-      }
-    };
-
-    getConnection();
-
-    return () => {
-      clearInterval(int)
-      if (connection?.state === HubConnectionState.Connected)
-      {
-        connection.off('messageAdded', messageRefresher)
-        connection.off('messageDeleted', messageRefresher)
-
-      }
-      connection && stopSignalRConnection(connection);
-    };
-  }, []);
-
+  const { messages, activeChannel, name } = useLoaderData();
 
   const hasActiveChannel = activeChannel !== '';
   const title = !hasActiveChannel
