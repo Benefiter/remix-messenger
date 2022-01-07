@@ -10,8 +10,6 @@ export const getChannels = async () => {
       channels,
     };
   } catch (error) {
-    console.log('In catch of catch-try');
-    console.log({ error });
     return {
       error,
     };

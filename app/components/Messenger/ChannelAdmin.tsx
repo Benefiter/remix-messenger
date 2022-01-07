@@ -68,7 +68,7 @@ const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
           Delete Channel
         </Link>
       )}
-        <Link className='btn btn-primary' to='logout'>
+        <Link className='btn btn-primary ms-2' to='logout' title='Logout'>
           <i className='bi-box-arrow-right' />
         </Link>
     </>

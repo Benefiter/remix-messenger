@@ -43,8 +43,6 @@ export const action: ActionFunction = async ({ request }) => {
   } else {
     const { channel } = formDataItems;
 
-    console.log('Channel to delete *******')
-    console.log({channel});
     await removeChannel({channelId: channel});
     const activeChannel = await getSessionActiveChannel(request);
     return await setSessionActiveChannel(

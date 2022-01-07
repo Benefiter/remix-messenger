@@ -4,21 +4,22 @@ import {
   LoaderFunction,
   Outlet,
   redirect,
+  useFetcher,
   useLoaderData,
 } from 'remix';
-import { env } from 'process';
 import Layout from '~/components/Layout';
-
+import React from 'react';
 import styles from '~/components/Messenger/styles.css';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { Channel, ChannelMessage } from '~/messenger-types';
-import { ebProps } from '~/root';
+// import { ebProps } from '~/root';
 import {
   getSessionActiveChannelAndId,
   getUserName,
   setSessionActiveChannelAndId,
 } from '~/utils/session.server';
 import { addMessage, getAllChannels, getMessagesForChannels } from '~/utils/messenger.server';
+// import { dbItemChangedEventEmitter } from '~/utils/db.server';
 
 export const links: LinksFunction = () => {
   return [
@@ -35,14 +36,14 @@ export const action: ActionFunction = async ({ request }) => {
   const formDataItems = await getFormDataItemsFromRequest(request, [
     'channel',
     'message',
-    'logoutuser'
+    'dbChange'
   ]);
 
-  const { channel, message,logoutuser } = formDataItems;
+  const { channel, message, dbChange } = formDataItems;
 
+  console.log({dbChange, channel, message})
+  if (dbChange === 'true')     return redirect('/messenger/showchannel');
 
-  console.log('MESSENGEr ActionFunction');
-  console.log({ channel, message, logoutuser });
 
   const channelData = channel?.split(',');
 
@@ -59,18 +60,11 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  console.log('Messenger Loader ');
-  env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-
+  // env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  
   const { channels } = await getAllChannels();
-  console.log('messenger LoadFunction');
-  console.log('channels')
-  console.log({channels});
 
   const { messages, error } = await getMessagesForChannels(channels);
-  console.log('messages for channels');
-  console.log({messages});
-
   const { activeChannel, channelId } = await getSessionActiveChannelAndId(
     request
   );
@@ -96,6 +90,16 @@ export type SessionState = {
 
 const Messenger = () => {
   const sessionState: SessionState = useLoaderData();
+  const fetcher = useFetcher();
+
+  React.useEffect(() => {
+    console.log('Messenger useEffect called')
+    const timerId = setInterval(() => {
+      fetcher.submit({dbChange: 'true'}, {method: 'post'});
+    }, 5000);
+
+    return () => {clearInterval(timerId)}
+  },[])
 
   return (
     <>
@@ -105,13 +109,13 @@ const Messenger = () => {
     </>
   );
 };
-export const ErrorBoundary = ({ error }: ebProps) => {
-  return (
-    <>
-      <h1>Messenger Error</h1>
-      {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
-    </>
-  );
-};
+// export const ErrorBoundary = ({ error }: ebProps) => {
+//   return (
+//     <>
+//       <h1>Messenger Error</h1>
+//       {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
+//     </>
+//   );
+// };
 
 export default Messenger;

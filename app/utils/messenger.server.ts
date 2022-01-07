@@ -1,5 +1,4 @@
 import { db } from './db.server';
-import { Channel } from './../messenger-types';
 
 type channelAddDBOperationArgs = {
   name: string;
@@ -82,4 +81,3 @@ export async function getMessagesForChannels(channels: PrismaChannelDef[]) {
     return { messages: [], error };
   });
 }
-

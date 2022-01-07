@@ -1,7 +1,7 @@
 import { Row, Col } from 'reactstrap';
 import { ChannelMessage } from '../../messenger-types';
 import Message from '../../components/Message/Message';
-import { ActionFunction, LoaderFunction, redirect, useLoaderData, useSubmit, LinksFunction } from 'remix';
+import { ActionFunction, LoaderFunction, redirect, useLoaderData, LinksFunction } from 'remix';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import styles from '~/components/Messenger/styles.css';
 import { getSessionActiveChannelAndId, getUserName } from '~/utils/session.server';
@@ -18,19 +18,21 @@ export const links: LinksFunction = () => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  const formDataItems = await getFormDataItemsFromRequest(request, ['action']);
+  const formDataItems = await getFormDataItemsFromRequest(request, ['action', 'messageID']);
 
-  const { action } = formDataItems;
+  const { messageID, action } = formDataItems;
 
-  console.log('action in showchannel action function')
-  console.log(action)
+  console.log('showchannel actionfunction');
+  console.log({messageID});
+
 
   if (action === '/refresh')
   {
     return redirect('/messenger/showchannel');
   }
 
-  const actionData = action?.split(',');
+  const actionData = messageID?.split(',');
+  console.log({actionData})
   const messageId = actionData[0];
 
   if (messageId != null) {
@@ -56,8 +58,6 @@ export const loader: LoaderFunction = async ({ request }) => {
       channelId
     };
   } catch (error) {
-    console.log('In catch of catch-try');
-    console.log({ error });
     return {
       error,
     };

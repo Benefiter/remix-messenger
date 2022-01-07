@@ -8,10 +8,11 @@ import {
   Outlet,
   ScrollRestoration,
   useLoaderData,
-  LinksFunction
+  LinksFunction,
+  Scripts
 } from 'remix';
 import type { MetaFunction } from 'remix';
-import { env } from 'process';
+// import { env } from 'process';
 import globalStylesUrl from "./styles/global.css";
 import globalMediumStylesUrl from "./styles/global-medium.css";
 import globalLargeStylesUrl from "./styles/global-large.css";
@@ -41,7 +42,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  // env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
   try {
     return {
@@ -115,9 +116,9 @@ export default function App() {
             </>
           )}
           <Outlet />
+          <Scripts />
         </>
         <ScrollRestoration />
-        {/* <Scripts /> */}
         {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
     </html>
@@ -128,11 +129,11 @@ export type ebProps = {
   error: string | Array<string>;
 };
 
-export const ErrorBoundary = ({ error }: ebProps) => {
-  return (
-    <>
-      <h1>Error</h1>
-      {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
-    </>
-  );
-};
+// export const ErrorBoundary = ({ error }: ebProps) => {
+//   return (
+//     <>
+//       <h1>Error</h1>
+//       {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
+//     </>
+//   );
+// };

@@ -3,7 +3,7 @@ import {
   createCookieSessionStorage,
   redirect
 } from "remix";
-import { db } from "./db.server";
+import { db, dbItemChangedEventEmitter } from "./db.server";
 
 type LoginForm = {
   username: string;
@@ -41,9 +41,9 @@ if (!sessionSecret) {
   throw new Error("SESSION_SECRET must be set");
 }
 
-const storage = createCookieSessionStorage({
+let storage = createCookieSessionStorage({
   cookie: {
-    name: "RJ_session",
+    name: `messenger_session`,
     // normally you want this to be `secure: true`
     // but that doesn't work on localhost for Safari
     // https://web.dev/when-to-use-local-https/
@@ -129,6 +129,24 @@ export async function createUserSession(
   userId: string,
   redirectTo: string
 ) {
+  if (!sessionSecret) {
+    throw new Error("SESSION_SECRET must be set");
+  }
+  
+  // storage = createCookieSessionStorage({
+  //   cookie: {
+  //     name: `messenger_session_${userId}`,
+  //     // normally you want this to be `secure: true`
+  //     // but that doesn't work on localhost for Safari
+  //     // https://web.dev/when-to-use-local-https/
+  //     secure: process.env.NODE_ENV === "production",
+  //     secrets: [sessionSecret],
+  //     sameSite: "lax",
+  //     path: "/",
+  //     maxAge: 60 * 60 * 24 * 30,
+  //     httpOnly: true
+  //   }
+  // });
   const session = await storage.getSession();
   session.set("userId", userId);
   return redirect(redirectTo, {
@@ -180,6 +198,8 @@ export async function getSessionActiveChannel(request: Request) {
 
 export async function userloggedIn (request: Request) {
   const session = await getUserSession(request);
-  console.log(await session.has('userId'))
   return await session.has('userId')
 }
+
+// dbItemChangedEventEmitter.on('dbItemCreateOrDeleteEvent', () => redirect('/messenger/showchannel'))
+
