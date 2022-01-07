@@ -1,10 +1,11 @@
-import { Button, Offcanvas, OffcanvasBody, OffcanvasHeader } from 'reactstrap';
+import { Offcanvas, OffcanvasBody, OffcanvasHeader } from 'reactstrap';
+import { Link, Form } from 'remix'
 
 type SidebarProps = {
   sidebarIsOpen: boolean,
   toggleSidebar: () => void
 }
-const Sidebar = ({sidebarIsOpen, toggleSidebar}: SidebarProps) => {
+const Sidebar = ({ sidebarIsOpen, toggleSidebar }: SidebarProps) => {
 
   return (
     <>
@@ -17,18 +18,14 @@ const Sidebar = ({sidebarIsOpen, toggleSidebar}: SidebarProps) => {
       >
         <OffcanvasHeader toggle={toggleSidebar}>Menu</OffcanvasHeader>
         <OffcanvasBody>
-          <div className='py-2'>
-            <Button color='info' onClick={() => toggleSidebar && toggleSidebar()}>
-              <i className='bi-patch-question pe-1' />
+          <Form method='post'>
+            <Link onClick={() => toggleSidebar && toggleSidebar()} className='navbar-link btn btn-primary' to='/sidebar/about'>
               About
-            </Button>
-          </div>
-          <div className='py-2'>
-            <Button color='info' onClick={() => toggleSidebar && toggleSidebar()}>
-              <i className='bi-speedometer pe-1' />
+            </Link>
+            <Link onClick={() => toggleSidebar && toggleSidebar()} className='navbar-link btn btn-primary' to='/sidebar/dashboard'>
               Dashboard
-            </Button>
-          </div>
+            </Link>
+          </Form>
         </OffcanvasBody>
       </Offcanvas>
     </>
