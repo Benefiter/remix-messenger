@@ -116,7 +116,7 @@ export default function App() {
             </>
           )}
           <Outlet />
-          <Scripts />
+          {/* <Scripts /> */}
         </>
         <ScrollRestoration />
         {process.env.NODE_ENV === 'development' && <LiveReload />}

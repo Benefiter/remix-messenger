@@ -64,6 +64,7 @@ const AddChannel = () => {
                 Channel Name:
               </label>{' '}
               <input
+                style={{color: 'black'}}
                 autoFocus
                 type='text'
                 placeholder='Enter Channel Name'
