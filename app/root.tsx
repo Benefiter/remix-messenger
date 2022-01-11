@@ -9,7 +9,8 @@ import {
   ScrollRestoration,
   useLoaderData,
   LinksFunction,
-  Scripts
+  Scripts,
+  useCatch
 } from 'remix';
 import type { MetaFunction } from 'remix';
 // import { env } from 'process';
@@ -116,7 +117,7 @@ export default function App() {
             </>
           )}
           <Outlet />
-          {/* <Scripts /> */}
+          <Scripts />
         </>
         <ScrollRestoration />
         {process.env.NODE_ENV === 'development' && <LiveReload />}
@@ -129,11 +130,21 @@ export type ebProps = {
   error: string | Array<string>;
 };
 
-// export const ErrorBoundary = ({ error }: ebProps) => {
-//   return (
-//     <>
-//       <h1>Error</h1>
-//       {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
-//     </>
-//   );
-// };
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <h1>
+          {caught.status} {caught.statusText}
+        </h1>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
