@@ -1,9 +1,11 @@
 import {
   ActionFunction,
   Form,
+  Link,
   LinksFunction,
   redirect,
   useActionData,
+  useSubmit,
 } from 'remix';
 import styles from '~/components/Messenger/styles.css';
 import { Card, CardHeader } from 'reactstrap';
@@ -26,29 +28,25 @@ export const links: LinksFunction = () => {
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await getFormDataItemsFromRequest(request, [
-    'action',
     'channel',
   ]);
 
-  const { action, channel } = formData;
-  if (action === 'Cancel') {
-    return redirect('/messenger');
-  } else {
-    const errors: PostAddChannelFormError = {};
-    if (channel == null || channel === '') errors.channel = true;
+  const { channel } = formData;
+  const errors: PostAddChannelFormError = {};
+  if (channel == null || channel === '') errors.channel = true;
 
-    if (Object.keys(errors).length) {
-      return errors;
-    }
-
-    await addChannel({name: channel});
-
-    return setSessionActiveChannel(request, channel)
+  if (Object.keys(errors).length) {
+    return errors;
   }
+
+  await addChannel({ name: channel });
+
+  return setSessionActiveChannel(request, channel)
 };
 
 const AddChannel = () => {
   const errors = useActionData();
+  const submit = useSubmit();
 
   return (
     <Card
@@ -57,14 +55,14 @@ const AddChannel = () => {
     >
       <CardHeader className=' w-100 text-center py-4'>
         <h3 className='mb-4'>Create Channel</h3>
-        <Form method='post'>
+        <Form method='post' action='/messenger/addchannel'>
           <div className='d-flex justify-content-between align-items-center row '>
             <div className='pb-4'>
               <label className='p-2 align-middle' id='activate'>
                 Channel Name:
               </label>{' '}
               <input
-                style={{color: 'black'}}
+                style={{ color: 'black' }}
                 autoFocus
                 type='text'
                 placeholder='Enter Channel Name'
@@ -75,18 +73,12 @@ const AddChannel = () => {
               )}
             </div>
             <div className='d-flex justify-content-evenly'>
-              <button
-                name='action'
-                className='btn btn-secondary'
-                value='Cancel'
-                type='submit'
-              >
+              <Link className='navbar-link btn btn-primary' to='/messenger/showchannel'>
                 Cancel
-              </button>
+              </Link>
+
               <button
                 className='btn btn-primary'
-                name='action'
-                value='Create'
                 type='submit'
               >
                 Create

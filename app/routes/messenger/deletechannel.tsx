@@ -1,6 +1,7 @@
 import {
   ActionFunction,
   Form,
+  Link,
   LinksFunction,
   LoaderFunction,
   redirect,
@@ -33,23 +34,17 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const formDataItems = await getFormDataItemsFromRequest(request, [
-    'action',
     'channel',
   ]);
-  const { action } = formDataItems;
 
-  if (action === 'Cancel') {
-    return redirect('/messenger');
-  } else {
-    const { channel } = formDataItems;
+  const { channel } = formDataItems;
 
-    await removeChannel({channelId: channel});
-    const activeChannel = await getSessionActiveChannel(request);
-    return await setSessionActiveChannel(
-      request,
-      channel === activeChannel ? '' : activeChannel.toString()
-    );
-  }
+  await removeChannel({ channelId: channel });
+  const activeChannel = await getSessionActiveChannel(request);
+  return await setSessionActiveChannel(
+    request,
+    channel === activeChannel ? '' : activeChannel.toString()
+  );
 };
 
 const DeleteChannel = () => {
@@ -62,7 +57,7 @@ const DeleteChannel = () => {
     >
       <CardHeader className=' w-100 text-center py-4'>
         <h3 className='mb-4'>Delete Channel</h3>
-        <Form method='post'>
+        <Form method='post' action='/messenger/deletechannel'>
           <div className='d-flex justify-content-between align-items-center row '>
             <div className='pb-4'>
               <label className='p-2 align-middle' id='activate'>
@@ -84,18 +79,11 @@ const DeleteChannel = () => {
               </select>
             </div>
             <div className='d-flex justify-content-between'>
-              <button
-                name='action'
-                className='btn btn-secondary'
-                value='Cancel'
-                type='submit'
-              >
+              <Link className='navbar-link btn btn-primary' to='/messenger/showchannel'>
                 Cancel
-              </button>
+              </Link>
               <button
                 className='btn btn-primary'
-                name='action'
-                value='Delete'
                 type='submit'
               >
                 Delete

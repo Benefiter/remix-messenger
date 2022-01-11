@@ -92,14 +92,14 @@ const Messenger = () => {
   const sessionState: SessionState = useLoaderData();
   const fetcher = useFetcher();
 
-  React.useEffect(() => {
-    console.log('Messenger useEffect called')
-    const timerId = setInterval(() => {
-      fetcher.submit({dbChange: 'true'}, {method: 'post'});
-    }, 5000);
+  // React.useEffect(() => {
+  //   console.log('Messenger useEffect called')
+  //   const timerId = setInterval(() => {
+  //     fetcher.submit({dbChange: 'true'}, {method: 'post'});
+  //   }, 5000);
 
-    return () => {clearInterval(timerId)}
-  },[])
+  //   return () => {clearInterval(timerId)}
+  // },[])
 
   return (
     <>
