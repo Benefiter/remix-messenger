@@ -109,13 +109,16 @@ const Messenger = () => {
     </>
   );
 };
-// export const ErrorBoundary = ({ error }: ebProps) => {
-//   return (
-//     <>
-//       <h1>Messenger Error</h1>
-//       {Array.isArray(error) ? error.map(e => <p>e</p>) : <p>{error}</p>}
-//     </>
-//   );
-// };
+
+export function ErrorBoundary({ error }: any) {
+  return (
+    <div>
+      <h1>Error</h1>
+      <p>{error.message}</p>
+      <p>The stack trace is:</p>
+      <pre>{error.stack}</pre>
+    </div>
+  );
+}
 
 export default Messenger;
