@@ -18,7 +18,7 @@ import {
   getUserName,
   setSessionActiveChannelAndId,
 } from '~/utils/session.server';
-import { addMessage, getAllChannels, getMessagesForChannels } from '~/utils/messenger.server';
+import { addMessage, getAllChannels, getMessagesForChannels, removeMessage } from '~/utils/messenger.server';
 // import { dbItemChangedEventEmitter } from '~/utils/db.server';
 
 export const links: LinksFunction = () => {
@@ -36,13 +36,25 @@ export const action: ActionFunction = async ({ request }) => {
   const formDataItems = await getFormDataItemsFromRequest(request, [
     'channel',
     'message',
-    'dbChange'
+    'dbChange',
+    'messageID'
   ]);
 
-  const { channel, message, dbChange } = formDataItems;
+  const { channel, message, dbChange, messageID } = formDataItems;
 
+  if (messageID) {
+    const actionData = messageID?.split(',');
+    console.log({actionData})
+    const messageId = actionData[0];
+  
+    if (messageId != null) {
+      removeMessage({ messageId });
+      return redirect('/messenger');
+    }
+  }
+  
   console.log({dbChange, channel, message})
-  if (dbChange === 'true')     return redirect('/messenger/showchannel');
+  if (dbChange === 'true')     return redirect('/messenger');
 
 
   const channelData = channel?.split(',');
@@ -53,7 +65,7 @@ export const action: ActionFunction = async ({ request }) => {
       channelId: channelData[0],
       author: user,
     });
-    return redirect('/messenger/showchannel');
+    return redirect('/messenger');
   }
 
   return await setSessionActiveChannelAndId(request, channelData);

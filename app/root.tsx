@@ -48,7 +48,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   try {
     return {
       userLoggedIn: await userloggedIn(request),
-      error: null,
+      errors: null,
     };
   } catch (errors) {
     return {
@@ -108,18 +108,13 @@ export default function App() {
                     Messenger Login
                   </Link>
                 </li>
-                <li>
-                  <Form action='/test' method='post'>
-                    <button className='btn btn-primary' type='submit'>Test</button>
-                  </Form>
-                </li>
               </ul>
             </>
           )}
           <Outlet />
+          <ScrollRestoration />
           <Scripts />
         </>
-        <ScrollRestoration />
         {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
     </html>

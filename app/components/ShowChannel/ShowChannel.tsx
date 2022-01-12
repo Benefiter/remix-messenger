@@ -1,11 +1,12 @@
 import { Row, Col } from 'reactstrap';
 import { ChannelMessage } from '../../messenger-types';
-import Message from '../../components/Message/Message';
+import Message from '../Message/Message';
 import { ActionFunction, LoaderFunction, redirect, useLoaderData, LinksFunction } from 'remix';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import styles from '~/components/Messenger/styles.css';
 import { getSessionActiveChannelAndId, getUserName } from '~/utils/session.server';
 import { removeMessage, getMessagesForChannels } from '~/utils/messenger.server';
+import { SessionState } from '~/routes/messenger';
 
 
 export const links: LinksFunction = () => {
@@ -18,18 +19,12 @@ export const links: LinksFunction = () => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  const formDataItems = await getFormDataItemsFromRequest(request, ['action', 'messageID']);
+  const formDataItems = await getFormDataItemsFromRequest(request, ['messageID']);
 
-  const { messageID, action } = formDataItems;
+  const { messageID } = formDataItems;
 
   console.log('showchannel actionfunction');
   console.log({messageID});
-
-
-  if (action === '/refresh')
-  {
-    return redirect('/messenger/showchannel');
-  }
 
   const actionData = messageID?.split(',');
   console.log({actionData})
@@ -37,42 +32,26 @@ export const action: ActionFunction = async ({ request }) => {
 
   if (messageId != null) {
     removeMessage({ messageId });
-    return redirect('/messenger/showchannel');
+    return redirect('/messenger');
   }
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
-  const name = await getUserName(request)
+type ShowChannelProps = {
+  sessionState: SessionState
+}
 
-  try {
-    const messageResults = await getMessagesForChannels([
-      { channelId, name: '' },
-    ]);
-    const { messages } = messageResults;
+const ShowChannel = ({sessionState}: ShowChannelProps) => {
+  const { messages, activeChannel, channelId, loginUser } = sessionState;
+  const messagesForActiveChannel = messages.filter(m => m.channelId.toString() === channelId)
+  console.log('ShowChannel');
+  console.log({messagesForActiveChannel})
 
-    return {
-      messages,
-      activeChannel,
-      name,
-      channelId
-    };
-  } catch (error) {
-    return {
-      error,
-    };
-  }
-};
-
-const ShowChannel = () => {
-  const { messages, activeChannel, name } = useLoaderData();
-
-  const hasActiveChannel = activeChannel !== '';
+  const hasActiveChannel = activeChannel && activeChannel !== '';
   const title = !hasActiveChannel
     ? 'Select a channel to see messages'
-    : messages.length === 0
+    : messagesForActiveChannel.length === 0
     ? `No messages on ${activeChannel}`
-    : `${messages.length} ${messages.length > 1 ? 'Messages' : 'Message'}`;
+    : `${messagesForActiveChannel.length} ${messagesForActiveChannel.length > 1 ? 'Messages' : 'Message'}`;
 
   return (
     <div
@@ -85,14 +64,14 @@ const ShowChannel = () => {
         <Col className='d-none d-lg-block'>
           <div
             className={`${
-              activeChannel && messages.length > 0
+              activeChannel && messagesForActiveChannel.length > 0
                 ? 'activechannel-messages-container'
                 : ''
             }`}
           >
-            {messages?.map((m: ChannelMessage, index: Number) => (
+            {messagesForActiveChannel?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-25 mw-25'>
-                <Message message={m} user={name} />
+                <Message message={m} user={loginUser} />
               </div>
             ))}
           </div>
@@ -100,14 +79,14 @@ const ShowChannel = () => {
         <Col className='d-none d-md-block d-lg-none'>
           <div
             className={`${
-              activeChannel && messages.length > 0
+              activeChannel && messagesForActiveChannel.length > 0
                 ? 'activechannel-messages-container'
                 : ''
             }`}
           >
-            {messages?.map((m: ChannelMessage, index: Number) => (
+            {messagesForActiveChannel?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-75 mw-75'>
-                <Message message={m} user={name} />
+                <Message message={m} user={loginUser} />
               </div>
             ))}
           </div>
@@ -115,14 +94,14 @@ const ShowChannel = () => {
         <Col className='d-block d-md-none'>
           <div
             className={`${
-              activeChannel && messages.length > 0
+              activeChannel && messagesForActiveChannel.length > 0
                 ? 'activechannel-messages-container'
                 : ''
             }`}
           >
-            {messages?.map((m: ChannelMessage, index: Number) => (
+            {messagesForActiveChannel?.map((m: ChannelMessage, index: Number) => (
               <div key={index.toString()} className='w-100 mw-100'>
-                <Message message={m} user={name} />
+                <Message message={m} user={loginUser} />
               </div>
             ))}
           </div>

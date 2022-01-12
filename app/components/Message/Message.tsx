@@ -1,7 +1,7 @@
 import { Card, CardBody } from 'reactstrap';
 import moment from 'moment';
 import { ChannelMessage } from '~/messenger-types';
-import { Form, useFetcher } from 'remix';
+import { Form } from 'remix';
 
 type MessageProps = {
   message: ChannelMessage;
@@ -11,7 +11,6 @@ type MessageProps = {
 const Message = ({ message, user }: MessageProps) => {
   const { author, content, createdOn, messageId, channelId } = message;
   const iconClass = author === user ? 'enable-delete' : 'disable-delete';
-  const fetcher=useFetcher();
 
   return (
     <Card className='m-2'>

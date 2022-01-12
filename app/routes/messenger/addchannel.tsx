@@ -3,15 +3,16 @@ import {
   Form,
   Link,
   LinksFunction,
-  redirect,
   useActionData,
-  useSubmit,
+  useNavigate,
 } from 'remix';
-import styles from '~/components/Messenger/styles.css';
-import { Card, CardHeader } from 'reactstrap';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { setSessionActiveChannel } from '~/utils/session.server';
 import { addChannel } from '~/utils/messenger.server';
+import { Dialog } from '@reach/dialog';
+import dialogStyles from '@reach/dialog/styles.css';
+import VisuallyHidden from '@reach/visually-hidden';
+
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -21,7 +22,7 @@ export const links: LinksFunction = () => {
   return [
     {
       rel: 'stylesheet',
-      href: styles,
+      href: dialogStyles,
     },
   ];
 };
@@ -46,15 +47,19 @@ export const action: ActionFunction = async ({ request }) => {
 
 const AddChannel = () => {
   const errors = useActionData();
-  const submit = useSubmit();
+  const navigate = useNavigate();
 
+  const close = () => navigate(-1)
   return (
-    <Card
-      style={{ width: '400px', float: 'right' }}
-      className='d-flex align-items-center shadow mb-5 bg-body rounded'
-    >
-      <CardHeader className=' w-100 text-center py-4'>
-        <h3 className='mb-4'>Create Channel</h3>
+    <>
+      <Dialog isOpen={true} onDismiss={close} aria-labelledby="modal-title">
+        <div className="d-flex">
+          <h3 id="modal-title">Create Channel</h3>
+          <button className="close-button ms-auto " onClick={close}>
+            <VisuallyHidden>Close</VisuallyHidden>
+            <span aria-hidden><i className='bi-x' /></span>
+          </button>
+        </div>
         <Form method='post' action='/messenger/addchannel'>
           <div className='d-flex justify-content-between align-items-center row '>
             <div className='pb-4'>
@@ -73,7 +78,7 @@ const AddChannel = () => {
               )}
             </div>
             <div className='d-flex justify-content-evenly'>
-              <Link className='navbar-link btn btn-primary' to='/messenger/showchannel'>
+              <Link className='navbar-link btn btn-primary' to='/messenger'>
                 Cancel
               </Link>
 
@@ -86,8 +91,8 @@ const AddChannel = () => {
             </div>
           </div>
         </Form>
-      </CardHeader>
-    </Card>
+      </Dialog>
+    </>
   );
 };
 
