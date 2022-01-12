@@ -12,6 +12,8 @@
   "dependencies": {
     "@microsoft/signalr": "^6.0.1",
     "@prisma/client": "^3.7.0",
+    "@reach/dialog": "^0.16.2",
+    "@reach/visually-hidden": "^0.16.0",
     "@remix-run/react": "^1.1.1",
     "@remix-run/serve": "^1.1.1",
     "@testing-library/jest-dom": "^5.16.1",

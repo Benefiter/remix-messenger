@@ -59,12 +59,12 @@ const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
       <Link
         className='navbar-link btn btn-primary'
         style={{ marginRight: '10px' }}
-        to='addchannel'
+        to='addchannel_1'
       >
         Add Channel
       </Link>
       {hasChannels && (
-        <Link className='navbar-link btn btn-primary' to='deletechannel'>
+        <Link className='navbar-link btn btn-primary' to='deletechannel_1'>
           Delete Channel
         </Link>
       )}
