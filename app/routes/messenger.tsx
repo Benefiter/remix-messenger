@@ -44,7 +44,6 @@ export const action: ActionFunction = async ({ request }) => {
 
   if (messageID) {
     const actionData = messageID?.split(',');
-    console.log({actionData})
     const messageId = actionData[0];
   
     if (messageId != null) {
@@ -53,9 +52,7 @@ export const action: ActionFunction = async ({ request }) => {
     }
   }
   
-  console.log({dbChange, channel, message})
   if (dbChange === 'true')     return redirect('/messenger');
-
 
   const channelData = channel?.split(',');
 

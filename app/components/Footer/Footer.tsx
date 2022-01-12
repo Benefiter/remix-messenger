@@ -15,7 +15,6 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  console.log('Footer loader****')
   const {activeChannel, channelId} = await getSessionActiveChannelAndId(request)
 
   return {

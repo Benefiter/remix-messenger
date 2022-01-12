@@ -23,11 +23,8 @@ export const action: ActionFunction = async ({ request }) => {
 
   const { messageID } = formDataItems;
 
-  console.log('showchannel actionfunction');
-  console.log({messageID});
 
   const actionData = messageID?.split(',');
-  console.log({actionData})
   const messageId = actionData[0];
 
   if (messageId != null) {
@@ -43,8 +40,6 @@ type ShowChannelProps = {
 const ShowChannel = ({sessionState}: ShowChannelProps) => {
   const { messages, activeChannel, channelId, loginUser } = sessionState;
   const messagesForActiveChannel = messages.filter(m => m.channelId.toString() === channelId)
-  console.log('ShowChannel');
-  console.log({messagesForActiveChannel})
 
   const hasActiveChannel = activeChannel && activeChannel !== '';
   const title = !hasActiveChannel
