@@ -4,15 +4,12 @@ import {
   Link,
   LinksFunction,
   useActionData,
-  useNavigate,
 } from 'remix';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { setSessionActiveChannel } from '~/utils/session.server';
 import { addChannel } from '~/utils/messenger.server';
-import { Dialog } from '@reach/dialog';
 import dialogStyles from '@reach/dialog/styles.css';
-import VisuallyHidden from '@reach/visually-hidden';
-
+import ModalDialog from '~/components/Modal/ModalDialog'
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -47,19 +44,9 @@ export const action: ActionFunction = async ({ request }) => {
 
 const AddChannel = () => {
   const errors = useActionData();
-  const navigate = useNavigate();
-
-  const close = () => navigate(-1)
   return (
     <>
-      <Dialog isOpen={true} onDismiss={close} aria-labelledby="modal-title">
-        <div className="d-flex">
-          <h3 id="modal-title">Create Channel</h3>
-          <button className="close-button ms-auto " onClick={close}>
-            <VisuallyHidden>Close</VisuallyHidden>
-            <span aria-hidden><i className='bi-x' /></span>
-          </button>
-        </div>
+      <ModalDialog modalTitle='Add Channel'>
         <Form method='post' action='/messenger/addchannel'>
           <div className='d-flex justify-content-between align-items-center row '>
             <div className='pb-4'>
@@ -91,7 +78,7 @@ const AddChannel = () => {
             </div>
           </div>
         </Form>
-      </Dialog>
+      </ModalDialog>
     </>
   );
 };

@@ -44,11 +44,11 @@ export const action: ActionFunction = async ({ request }) => {
   
     if (messageId != null) {
       removeMessage({ messageId });
-      return redirect('/messenger/showchannel');
+      return redirect('/messenger');
     }
   }
   
-  if (dbChange === 'true')     return redirect('/messenger/showchannel');
+  if (dbChange === 'true')     return redirect('/messenger');
 
   const channelData = channel?.split(',');
 
@@ -58,7 +58,7 @@ export const action: ActionFunction = async ({ request }) => {
       channelId: channelData[0],
       author: user,
     });
-    return redirect('/messenger/showchannel');
+    return redirect('/messenger');
   }
 
   return await setSessionActiveChannelAndId(request, channelData);

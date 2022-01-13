@@ -162,7 +162,7 @@ export async function setSessionActiveChannelAndId(request: Request, channelData
   );
   session.set('activeChannelId', channelData[0]);
   session.set('activeChannel', channelData[1]);
-  return redirect('/messenger/showchannel', {
+  return redirect('/messenger', {
     headers: {
       'Set-Cookie': await storage.commitSession(session),
     },
@@ -174,7 +174,7 @@ export async function setSessionActiveChannel(request: Request, channel: string)
     request.headers.get("Cookie")
   );
   session.set('activeChannel', channel);
-  return redirect('/messenger/showchannel', {
+  return redirect('/messenger', {
     headers: {
       'Set-Cookie': await storage.commitSession(session),
     },
@@ -201,5 +201,5 @@ export async function userloggedIn (request: Request) {
   return await session.has('userId')
 }
 
-// dbItemChangedEventEmitter.on('dbItemCreateOrDeleteEvent', () => redirect('/messenger/showchannel'))
+// dbItemChangedEventEmitter.on('dbItemCreateOrDeleteEvent', () => redirect('/messenger'))
 

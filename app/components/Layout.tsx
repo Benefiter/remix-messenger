@@ -3,6 +3,7 @@ import Sidebar from './Sidebar/Sidebar';
 import React from 'react'
 import Footer from './Footer/Footer';
 import { SessionState } from '~/routes/messenger';
+import ShowChannel from './ShowChannel/ShowChannel';
 
 type LayoutProps = {
   children: React.ReactNode,
@@ -21,6 +22,7 @@ const Layout = ({sessionState, children}: LayoutProps) => {
         <NavBar sessionState={sessionState} toggleSidebar={toggleSidebar}></NavBar>
         <Sidebar sidebarIsOpen={sidebarIsOpen} toggleSidebar={toggleSidebar}/>
         {children}
+        <ShowChannel sessionState={sessionState} />
         <Footer/>
       </main>
     </div>
