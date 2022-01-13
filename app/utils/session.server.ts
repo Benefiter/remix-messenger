@@ -162,7 +162,7 @@ export async function setSessionActiveChannelAndId(request: Request, channelData
   );
   session.set('activeChannelId', channelData[0]);
   session.set('activeChannel', channelData[1]);
-  return redirect('/messenger', {
+  return redirect('/messenger/showchannel', {
     headers: {
       'Set-Cookie': await storage.commitSession(session),
     },
@@ -174,7 +174,7 @@ export async function setSessionActiveChannel(request: Request, channel: string)
     request.headers.get("Cookie")
   );
   session.set('activeChannel', channel);
-  return redirect('/messenger', {
+  return redirect('/messenger/showchannel', {
     headers: {
       'Set-Cookie': await storage.commitSession(session),
     },

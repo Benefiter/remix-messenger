@@ -18,6 +18,7 @@ const MessengerButton = ({name, title, disabled, clickHandler, color, className,
         className={className}
         type={type}
         name={name}
+        onClick={clickHandler}
       >
         {name}
       </Button>

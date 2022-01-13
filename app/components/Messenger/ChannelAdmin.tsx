@@ -1,5 +1,5 @@
 import { Channel } from '~/messenger-types';
-import { Form, Link, LinksFunction, useSubmit } from 'remix';
+import { Form, Link, LinksFunction } from 'remix';
 import styles from '~/components/Messenger/styles.css';
 import { ebProps } from '~/root';
 
@@ -17,7 +17,6 @@ export const links: LinksFunction = () => {
 };
 
 const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
-  const submit = useSubmit();
   const hasChannels = channels?.length > 0;
 
   return (

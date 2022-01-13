@@ -52,7 +52,7 @@ export const action: ActionFunction = async ({
   const loginType = form.get("loginType");
   const username = form.get("username");
   const password = form.get("password");
-  const redirectTo = form.get("redirectTo") || "/messenger";
+  const redirectTo = form.get("redirectTo") || "/messenger/showchannel";
   if (
     typeof loginType !== "string" ||
     typeof username !== "string" ||

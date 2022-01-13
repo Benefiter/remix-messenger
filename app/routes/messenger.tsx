@@ -4,22 +4,18 @@ import {
   LoaderFunction,
   Outlet,
   redirect,
-  useFetcher,
   useLoaderData,
 } from 'remix';
 import Layout from '~/components/Layout';
-import React from 'react';
 import styles from '~/components/Messenger/styles.css';
 import { getFormDataItemsFromRequest } from '~/request-form-data-service';
 import { Channel, ChannelMessage } from '~/messenger-types';
-// import { ebProps } from '~/root';
 import {
   getSessionActiveChannelAndId,
   getUserName,
   setSessionActiveChannelAndId,
 } from '~/utils/session.server';
 import { addMessage, getAllChannels, getMessagesForChannels, removeMessage } from '~/utils/messenger.server';
-// import { dbItemChangedEventEmitter } from '~/utils/db.server';
 
 export const links: LinksFunction = () => {
   return [
@@ -48,11 +44,11 @@ export const action: ActionFunction = async ({ request }) => {
   
     if (messageId != null) {
       removeMessage({ messageId });
-      return redirect('/messenger');
+      return redirect('/messenger/showchannel');
     }
   }
   
-  if (dbChange === 'true')     return redirect('/messenger');
+  if (dbChange === 'true')     return redirect('/messenger/showchannel');
 
   const channelData = channel?.split(',');
 
@@ -62,14 +58,13 @@ export const action: ActionFunction = async ({ request }) => {
       channelId: channelData[0],
       author: user,
     });
-    return redirect('/messenger');
+    return redirect('/messenger/showchannel');
   }
 
   return await setSessionActiveChannelAndId(request, channelData);
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  // env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
   
   const { channels } = await getAllChannels();
 
@@ -99,7 +94,6 @@ export type SessionState = {
 
 const Messenger = () => {
   const sessionState: SessionState = useLoaderData();
-  const fetcher = useFetcher();
 
   // React.useEffect(() => {
   //   console.log('Messenger useEffect called')

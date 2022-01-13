@@ -1,4 +1,3 @@
-// import footerStyles from '../../styles/Footer.module.css';
 import React, { ChangeEvent } from 'react';
 import { Row, Col } from 'reactstrap';
 import MessengerButton from '../Buttons/MessengerButton';
@@ -31,6 +30,10 @@ const Footer = () => {
     const navbar = document.getElementById('navbar');
     setNavbarHeight(navbar?.offsetHeight ?? 0);
   }, []);
+
+  React.useEffect(() => {
+    setMessage('')
+  }, [channelId]);
 
   const updateMessage = (e: ChangeEvent<HTMLTextAreaElement>) =>
     setMessage(e.target.value);
@@ -69,7 +72,7 @@ const Footer = () => {
                 <Col className=' d-flex mt-4'>
                   <div className='d-flex align-items-start'>
                     <MessengerButton
-                      // disabled={message === ''}
+                      disabled={message === ''}
                       // className='btn btn-sm bg-primary primary mt-4 mb-2'
                       title='Send Message'
                       name='Send'
@@ -81,29 +84,6 @@ const Footer = () => {
             </Form>
           </Col>
         )}
-
-        {/* <Col className='d-flex align-items-center flex-column'>
-          <>
-            <div className='pt-3 h4'>Board Status</div>
-            <div className='stats p-3 fw-bold text-center'>
-              There are {stats.activeChannels} active Channels
-              <div className='pt-2 fs-6 fw-light'>{stats.lastMessageStat}</div>
-            </div>
-          </>
-        </Col> */}
-        {/* <Col
-          lg='2'
-          className={`${
-            //@ts-ignore 2339
-            footerStyles.footerButton
-          } d-flex justify-content-end mt-4`}
-        >
-          <MessengerButton
-            clickHandler={() => openInNewTab()}
-            title='Start a new session in a new window'
-            name='New Session'
-          />
-        </Col> */}
       </Row>
     </div>
   );
