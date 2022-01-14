@@ -49,11 +49,10 @@ const AddChannel = () => {
     <>
       <ModalDialog modalTitle='Add Channel'>
         <Form method='post' action='/messenger/addchannel'>
-          <div className='d-flex justify-content-between align-items-center row '>
-            <div className='pb-4'>
-              <label className='p-2 align-middle' id='activate'>
-                Channel Name:
-              </label>{' '}
+            <div className='py-4 d-flex align-items-center'>
+              <label className='pe-2' id='activate'>
+                Channel:
+              </label>
               <input
                 style={{ color: 'black' }}
                 autoFocus
@@ -66,7 +65,6 @@ const AddChannel = () => {
               )}
             </div>
             <ModalDialogButtons operationTitle='Create' />
-          </div>
         </Form>
       </ModalDialog>
     </>

@@ -52,8 +52,8 @@ const DeleteChannel = () => {
   return (
     <ModalDialog modalTitle='Delete Channel'>
       <Form method='post' action='/messenger/deletechannel'>
-        <div className='py-2 mx-auto fs-5'>
-          <label className='p-2 align-middle' id='activate'>
+        <div className='py-2 mx-auto fs-6'>
+          <label className='pe-4 align-middle' id='activate'>
             Select Channel
           </label>
           <select

@@ -21,7 +21,7 @@ const ModalDialog = ({ children, modalTitle }: DialogModalProps) => {
     delay: 200,
   });
   return (
-    <Dialog isOpen={true} onDismiss={close} aria-labelledby='modal-title' style={{ width: '25vw', borderRadius: '5px'}} className='shadow rounded'>
+    <Dialog isOpen={true} onDismiss={close} aria-labelledby='modal-title' style={{ padding: '20px', width: '25vw', borderRadius: '5px'}} className='border border-1 border-dark shadow rounded'>
       <animated.div style={style}>
         <div className='float-end'>
           <i className='fs-6 bi-x-lg modal-closer' onClick={close} title='Close' />
