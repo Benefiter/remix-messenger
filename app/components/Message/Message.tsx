@@ -16,25 +16,26 @@ const Message = ({ message, user }: MessageProps) => {
     <Card className='m-2'>
       <CardBody>
         <Form method='post'>
-          <button
-            name='remove'
-            // value={`${messageId},${channelId}`}
-            // title='Delete'
-            className={`${iconClass}`}
-          >
-            <i className='bi-x-lg d-flex justify-content-end' />
-          </button>
-          <input readOnly hidden name='messageID' value={`${messageId},${channelId}`}/>
+          <input readOnly hidden name='messageID' value={`${messageId},${channelId}`} />
+          <div className='d-flex row'>
+            <div className='d-flex col justify-content-between'>
+              <div className=''>{`Sender: ${author}`}</div>
+              <button
+                name='remove'
+                title='Delete'
+                className={`${iconClass}`}
+              >
+                <i className='bi-x-lg' />
+              </button>
+            </div>
+            <div>{`Received: ${moment(createdOn).format(
+              'MMM DD YYYY hh:mm:ss a'
+            )}`}</div>
+          </div>
+          <div className='message-content'>
+            <div className='p-2 text-break'>{content}</div>
+          </div>
         </Form>
-        <div className='message-header'>
-          <div className=''>{`Sender: ${author}`}</div>
-          <div>{`Received: ${moment(createdOn).format(
-            'MMM DD YYYY hh:mm:ss a'
-          )}`}</div>
-        </div>
-        <div className='message-content'>
-          <div className='p-2 text-break'>{content}</div>
-        </div>
       </CardBody>
     </Card>
   );

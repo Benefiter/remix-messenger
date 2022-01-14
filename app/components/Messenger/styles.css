@@ -74,10 +74,12 @@
   height: max-content;
   float: right;
   opacity: 0.5;
+  padding: 0;
 }
 
 .enable-delete:hover {
-  background-color: var(--bs-blue);
+  color: black;
+  background-color: lightslategray;
 }
 
 .activechannel-messages-container {
