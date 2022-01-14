@@ -4,7 +4,7 @@ type MessengerButtonProps = {
   name: string,
   title?: string,
   disabled?: boolean,
-  clickHandler?: () => void,
+  clickHandler?: React.MouseEventHandler<HTMLButtonElement> | undefined,
   color?: string,
   className?: string,
   type?: 'submit' | 'reset' | 'button' | undefined;
