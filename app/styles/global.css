@@ -85,6 +85,7 @@
     margin-bottom: 2rem;
   }
   
+  label,
   h1,
   h2,
   h3,
@@ -328,10 +329,10 @@
     width: 100%;
   }
   
-  label {
+  /* label {
     margin: 0;
   }
-  
+   */
   [type="checkbox"] + label,
   [type="radio"] + label {
     margin-left: 0.5rem;
@@ -357,4 +358,15 @@
     background-color: hsla(356, 77%, 59%, 0.747);
     border-radius: 0.25rem;
     padding: 0.5rem 1rem;
+  }
+
+  .modal-closer {
+    padding: 0;
+    border: 1px solid black;
+    border-width: 1px;
+  }
+  .modal-closer:hover  {
+    color: black;
+    background-color: lightslategray;
+
   }

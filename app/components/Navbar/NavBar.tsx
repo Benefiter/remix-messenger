@@ -11,7 +11,7 @@ const NavBar = ({ sessionState, toggleSidebar }: NavBarProps) => {
   const { loginUser, channels } = sessionState;
   return (
     <div>
-      <Navbar id='navbar' color='secondary' expand='md' dark>
+      <Navbar style={{padding: '15px'}} id='navbar' color='secondary' expand='md' dark>
         <NavbarBrand>
           <i
             className='bi-chat-left-dots-fill'
@@ -22,7 +22,7 @@ const NavBar = ({ sessionState, toggleSidebar }: NavBarProps) => {
         <NavbarToggler onClick={toggleSidebar} />
         <Collapse navbar>
           <Nav className='me-auto' navbar>
-            <h4 className='lh-base'> User: {loginUser}</h4>
+            <h4 className='lh-base mb-0'> {loginUser}</h4>
           </Nav>
           <ChannelAdmin channels={channels} />
         </Collapse>

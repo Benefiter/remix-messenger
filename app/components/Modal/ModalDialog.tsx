@@ -9,10 +9,10 @@ type DialogModalProps = {
 }
 
 const ModalDialog = ({ children, modalTitle }: DialogModalProps) => {
-  const navigate=useNavigate()
-  
+  const navigate = useNavigate()
+
   const close = () => navigate(-1);
-  
+
   const style = useSpring({
     to: { opacity: 1 },
     from: { opacity: 0 },
@@ -21,22 +21,15 @@ const ModalDialog = ({ children, modalTitle }: DialogModalProps) => {
     delay: 200,
   });
   return (
-    <>
-      <Dialog isOpen={true} onDismiss={close} aria-labelledby='modal-title'>
-        <animated.div style={style}>
-          <div className='d-flex'>
-            <h3 id='modal-title'>{modalTitle}</h3>
-            <button className='close-button ms-auto ' onClick={close}>
-              <VisuallyHidden>Close</VisuallyHidden>
-              <span aria-hidden>
-                <i className='bi-x' />
-              </span>
-            </button>
-          </div>
-          {children}
-        </animated.div>
-      </Dialog>
-    </>
+    <Dialog isOpen={true} onDismiss={close} aria-labelledby='modal-title' style={{ width: '25vw', borderRadius: '5px'}} className='shadow rounded'>
+      <animated.div style={style}>
+        <div className='float-end'>
+          <i className='fs-6 bi-x-lg modal-closer' onClick={close} title='Close' />
+        </div>
+        <h3 id='modal-title'>{modalTitle}</h3>
+        {children}
+      </animated.div>
+    </Dialog>
   );
 };
 

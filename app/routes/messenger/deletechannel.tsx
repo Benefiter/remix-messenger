@@ -15,6 +15,7 @@ import {
 import { removeChannel, getAllChannels } from '~/utils/messenger.server';
 import dialogStyles from '@reach/dialog/styles.css';
 import ModalDialog from '~/components/Modal/ModalDialog';
+import ModalDialogButtons from '~/components/Modal/ModalDialogButtons';
 
 export const links: LinksFunction = () => {
   return [
@@ -51,7 +52,7 @@ const DeleteChannel = () => {
   return (
     <ModalDialog modalTitle='Delete Channel'>
       <Form method='post' action='/messenger/deletechannel'>
-        <div className='py-2 mx-auto fs-4'>
+        <div className='py-2 mx-auto fs-5'>
           <label className='p-2 align-middle' id='activate'>
             Select Channel
           </label>
@@ -70,17 +71,7 @@ const DeleteChannel = () => {
             })}
           </select>
         </div>
-        <div className='d-flex justify-content-evenly'>
-          <Link className='navbar-link btn btn-primary' to='/messenger'>
-            Cancel
-          </Link>
-          <button
-            className='btn btn-primary'
-            type='submit'
-          >
-            Delete
-          </button>
-        </div>
+        <ModalDialogButtons operationTitle='Delete' />
       </Form>
     </ModalDialog>
   );

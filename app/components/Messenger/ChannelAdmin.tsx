@@ -27,9 +27,9 @@ const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
         </div>
       ) : (
         <Form method='post'>
-          <div className='d-flex text-center justify-content-between align-items-center px-4'>
+          <div className='d-flex text-center  align-items-center px-4'>
             <div className='d-flex px-4 align-items-center'>
-              <label className='p-2 align-middle' id='activate'>
+              <label className='p-2 fs-5 align-middle' id='activate'>
                 Channels:
               </label>
 
@@ -56,14 +56,14 @@ const ChannelAdmin = ({ channels }: ChannelAdminProps) => {
         </Form>
       )}
       <Link
-        className='navbar-link btn btn-primary'
-        style={{ marginRight: '10px' }}
+        className='navbar-link btn btn-primary text-decoration-none'
+        style={{ marginRight: '10px', width: '200px'}}
         to='addchannel'
       >
         Add Channel
       </Link>
       {hasChannels && (
-        <Link className='navbar-link btn btn-primary' to='deletechannel'>
+        <Link style={{width: '200px'}} className='navbar-link btn btn-primary text-decoration-none' to='deletechannel'>
           Delete Channel
         </Link>
       )}

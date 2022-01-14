@@ -10,6 +10,7 @@ import { setSessionActiveChannel } from '~/utils/session.server';
 import { addChannel } from '~/utils/messenger.server';
 import dialogStyles from '@reach/dialog/styles.css';
 import ModalDialog from '~/components/Modal/ModalDialog'
+import ModalDialogButtons from '~/components/Modal/ModalDialogButtons';
 
 type PostAddChannelFormError = {
   channel?: boolean;
@@ -64,18 +65,7 @@ const AddChannel = () => {
                 <div className='text-danger'>Please enter a channel name</div>
               )}
             </div>
-            <div className='d-flex justify-content-evenly'>
-              <Link className='navbar-link btn btn-primary' to='/messenger'>
-                Cancel
-              </Link>
-
-              <button
-                className='btn btn-primary'
-                type='submit'
-              >
-                Create
-              </button>
-            </div>
+            <ModalDialogButtons operationTitle='Create' />
           </div>
         </Form>
       </ModalDialog>
