@@ -1,8 +1,14 @@
-# Welcome to Remix!
+# Welcome to my first Remix project!
 
 - [Remix Docs](https://remix.run/docs)
 
 ## Development
+
+After cloning the git repo and running npm install, run the following command
+
+npx prisma db push
+
+This will read the environment variables and create the Prisma database file.
 
 From your terminal:
 

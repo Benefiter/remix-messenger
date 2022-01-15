@@ -4,5 +4,7 @@ node_modules
 /build
 /public/build
 
+package-lock.json
+
 /prisma/dev.db
 .env
