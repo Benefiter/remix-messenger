@@ -5,10 +5,11 @@
 ## Development
 
 After cloning the git repo and running npm install, run the following command
+from the terminal to read the environment variables and create the Prisma database file
 
+```sh
 npx prisma db push
-
-This will read the environment variables and create the Prisma database file.
+```
 
 From your terminal:
 
